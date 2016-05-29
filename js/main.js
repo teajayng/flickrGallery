@@ -8,8 +8,6 @@
   function init() {
     utils.getPhotostreamData({
       callback: function(res) {
-        console.log(res);
-
         if (res && res.data) {
           pages = res.data.photos.pages;
 

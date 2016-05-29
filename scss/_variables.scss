@@ -2,9 +2,10 @@ $left-arrow: url('data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1l
 $right-arrow: url('data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzOC44NSA3Mi4xNCI+PHRpdGxlPlVudGl0bGVkLTE8L3RpdGxlPjxyZWN0IHg9IjE3Ljk1IiB5PSItNS41OCIgd2lkdGg9IjIuOTQiIGhlaWdodD0iNTAiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC04LjA1IDE5LjQyKSByb3RhdGUoLTQ1KSIgZmlsbD0iI2FiYWJhYiIgc3Ryb2tlPSIjYWJhYmFiIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiLz48cmVjdCB4PSIxNy45NSIgeT0iMjcuNzEiIHdpZHRoPSIyLjk0IiBoZWlnaHQ9IjUwIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0Mi45NiAxLjcpIHJvdGF0ZSg0NSkiIGZpbGw9IiNhYmFiYWIiIHN0cm9rZT0iI2FiYWJhYiIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIi8+PC9zdmc+');
 $close-icon: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgOTYgOTYiIHhtbDpzcGFjZT0icHJlc2VydmUiPjxwb2x5Z29uIGZpbGw9IiNBQUFBQUIiIHBvaW50cz0iOTYsMTQgODIsMCA0OCwzNCAxNCwwIDAsMTQgMzQsNDggMCw4MiAxNCw5NiA0OCw2MiA4Miw5NiA5Niw4MiA2Miw0OCAiLz48L3N2Zz4=');
 $text-color: rgb(51, 51, 51);
-$close-text: rgb(170, 170, 170);
+$gray-text: rgb(170, 170, 170);
 $background-color: rgb(244, 244, 244);
 $overlay: rgba(0, 0, 0, .55);
 $white: rgb(255, 255, 255);
 $white-with-alpha: rgba(255, 255, 255, .9);
-$arrow-background-color: rgba(255, 255, 255, .65);
+$arrow-background-color: rgba(255, 255, 255, .9);
+$mobile-thumbnail-width: 130px;

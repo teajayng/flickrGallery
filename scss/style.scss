@@ -39,6 +39,8 @@ header {
 }
 
 #thumbnail-gallery {
+  display: flex;
+
   margin: 0 auto;
 
   padding: 0;
@@ -47,14 +49,13 @@ header {
 
   list-style: none;
 
-  text-align: left;
+  align-items: center;
+  justify-content: center;
+  flex-flow: row wrap;
+  align-content: center;
 
   li {
-    display: inline-block;
-
     padding: 5px;
-
-    vertical-align: top;
 
     a {
       display: block;
@@ -71,7 +72,7 @@ header {
 
   border: none;
 
-  appearance: none;
+  -webkit-appearance: none;
 
   &:hover {
     opacity: 1;
@@ -93,4 +94,25 @@ footer {
 
 p {
   font-size: 1em;
+}
+
+@media screen and (max-width: 414px) {
+
+  #thumbnail-gallery {
+
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+  }
+
+  .thumbnail {
+    opacity: 1;
+  }
+}
+
+@media screen and (max-width: 320px) {
+
+  .thumbnail {
+    max-width: $mobile-thumbnail-width;
+  }
 }

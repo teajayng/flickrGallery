@@ -18,10 +18,13 @@
 
     background-color: $white-with-alpha;
 
-    padding: 30px 30px 10px;
+    padding: 30px;
 
     width: 100%;
+    max-width: 850px;
     height: auto;
+
+    overflow: hidden;
 
     justify-content: center;
     align-items: center;
@@ -30,7 +33,7 @@
 
   img {
     max-width: 650px;
-    max-height: 440px;
+    max-height: 433px;
   }
 
   &.active {
@@ -39,7 +42,7 @@
     visibility: visible;
   }
 
-  &:before {
+  #lightbox--overlay {
     display: block;
     position: fixed;
     top: 0;
@@ -49,28 +52,28 @@
 
     width: 100%;
     height: 100%;
-
-    content: '';
   }
 }
 
 #lightbox--image-gallery {
-  transition: all .4s ease;
-
   margin: 0;
 
   padding: 0;
 
   list-style: none;
 
+  // transition: all .4s ease;
+
   li {
-    display: block;
+    display: flex;
 
     float: left;
 
     width: 650px;
+    height: 433px;
 
-    text-align: center;
+    justify-content: center;
+    align-items: center;
   }
 }
 
@@ -78,9 +81,8 @@
   position: relative;
 
   width: 650px;
-  height: 440px;
-
-  overflow: hidden;
+  height: 433px;
+  // overflow: hidden;
 }
 
 #lightbox--close {
@@ -94,7 +96,7 @@
 
   text-transform: uppercase;
 
-  color: $close-text;
+  color: $gray-text;
 
   font-size: .8em;
 
@@ -125,21 +127,26 @@
 #lightbox--next {
   display: flex;
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: 30px;
+  bottom: 30px;
 
   z-index: 1;
 
+  background-color: $arrow-background-color;
   cursor: pointer;
 
-  width: 120px;
-  height: 100%;
+  width: 100px;
+  height: auto;
+
+  text-indent: -9999px;
+
+  white-space: nowrap;
 
   justify-content: center;
   align-items: center;
   -webkit-tap-highlight-color: transparent;
 
-  &:before {
+  span {
     display: block;
 
     opacity: .3;
@@ -155,18 +162,14 @@
     vertical-align: middle;
 
     text-align: center;
-
-    content: '';
   }
 
   &:hover {
 
-    &:before {
+    span {
       transition: all .3s ease;
 
       opacity: 1;
-
-      background-color: $arrow-background-color;
     }
   }
 
@@ -178,7 +181,7 @@
 #lightbox--prev {
   left: 0;
 
-  &:before {
+  span {
     background-image: $left-arrow;
     background-repeat: no-repeat;
   }
@@ -187,11 +190,108 @@
 #lightbox--next {
   right: 0;
 
-  &:before {
+  span {
     background-image: $right-arrow;
     background-repeat: no-repeat;
   }
 }
 
-// @media screen and (min-width: 1032px) {
-// }
+#lightbox--image-title {
+  position: absolute;
+  right: 0;
+  left: 0;
+
+  text-align: center;
+}
+
+@media screen and (max-width: 850px) {
+
+  #lightbox {
+
+    .lightbox--wrapper {
+      padding: 60px 0;
+    }
+
+    img {
+      max-width: 650px;
+      max-height: 433px;
+    }
+  }
+}
+
+@media screen and (max-width 768px) {
+  #lightbox--prev,
+  #lightbox--next {
+    top: 59px;
+    bottom: 59px;
+
+    width: auto;
+    height: auto;
+  }
+}
+
+@media screen and (max-width: 414px) {
+
+  #lightbox {
+
+    img {
+      max-width: 320px;
+      max-height: 213px;
+    }
+  }
+
+  .lightbox--image-mask {
+    width: 320px;
+    height: 213px;
+
+    overflow: hidden;
+  }
+
+  #lightbox--image-gallery {
+
+    li {
+      width: 320px;
+      height: 213px;
+    }
+  }
+
+  #lightbox--prev,
+  #lightbox--next {
+    display: block;
+    position: absolute;
+    top: auto;
+    bottom: 35px;
+
+    background-color: transparent;
+
+    width: auto;
+    height: auto;
+
+    text-indent: 0;
+    text-transform: uppercase;
+
+    color: $gray-text;
+
+    font-size: .8em;
+
+    span {
+      display: none;
+
+      visibility: hidden;
+
+      background-image: none;
+    }
+  }
+
+  #lightbox--prev {
+    left: 5px;
+  }
+
+  #lightbox--next {
+    right: 5px;
+  }
+
+  #lightbox--close {
+    opacity: 1;
+  }
+}
