@@ -49,9 +49,12 @@
     }
 
     if (typeof XMLHttpRequest !== 'undefined') {
-      // we could probably do without this check since it's fairly well
-      // supported in modern browsers
       xhr = new XMLHttpRequest();
+    } else {
+      // not going to implement the fallbacks at this time
+      // because support is good enough
+      // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
+      return;
     }
 
     xhr.onreadystatechange = function() {
@@ -216,35 +219,55 @@
     generateEmbiggenedPhotoUrl: generateEmbiggenedPhotoUrl
   });
 })(window);
+;// (function(window) {
+//   function Lightbox(currentIndex, photos) {
+//     this.currentIndex = 0;
+//     this.currentImage = null;
+//     this.loadedImages = {};
+
+//     this.imageWidth = 0;
+//     this.setImageWidth();
+
+//     this.prev = document.getElementById('lightbox--prev');
+//     this.next = document.getElementById('lightbox--next');
+//     this.lightbox = document.getElementById('lightbox');
+//     this.imageGallery = document.getElementById('lightbox--image-gallery');
+//   }
+
+//   Lightbox.prototype.show = function(index) {
+//     console.log('trying to show lightbox');
+//   };
+
+//   window.GalleryLightbox = GalleryLightbox;
+// })(window);
 ;(function(window) {
   'use strict';
 
   function Gallery(photos) {
-    var self = this;
+    this.photos = photos;
 
     this.currentIndex = 0;
     this.currentImage = null;
-    this.photos = photos;
     this.loadedImages = {};
 
-    this.imageWidth = Math.min(utils.calculateViewportWidth(), 650);
+    this.imageWidth = 0;
+    this.setImageWidth();
 
     this.prev = document.getElementById('lightbox--prev');
     this.next = document.getElementById('lightbox--next');
+    this.close = document.getElementById('lightbox--close');
+    this.overlay = document.getElementById('lightbox--overlay');
+    this.lightbox = document.getElementById('lightbox');
     this.imageGallery = document.getElementById('lightbox--image-gallery');
 
-    this.prev.addEventListener('click', function() {
-      self.showPrev();
-    });
-
-    this.next.addEventListener('click', function() {
-      self.showNext();
-    });
+    this.keyupHandler = this.keyupHandler.bind(this);
+    this.resizeHandler = this.resizeHandler.bind(this);
+    this.showPrev = this.showPrev.bind(this);
+    this.showNext = this.showNext.bind(this);
   }
 
   Gallery.prototype.showLightbox = function(index) {
-    var self = this,
-    lightbox = document.getElementById('lightbox');
+    var self = this;
 
     this.currentIndex = index;
 
@@ -256,10 +279,6 @@
     this.imageGallery.style.width = (this.photos.length * this.imageWidth).toString() + 'px';
     this.imageGallery.style.transform = "translate3d(" + index * -this.imageWidth + "px, 0, 0)";
     this.imageGallery.style.transition = "all .4s ease";
-
-    window.addEventListener('resize', utils.debounce(function() {
-      self.recalculateLightbox(index);
-    }, 250));
 
     if (this.currentIndex > 0) {
       this.prev.classList.remove('inactive');
@@ -273,13 +292,17 @@
       this.next.classList.add('inactive');
     }
 
-    this.attachCloseEvents(lightbox);
+    this.attachEvents();
 
-    lightbox.classList.add('active');
+    this.lightbox.classList.add('active');
   };
 
   Gallery.prototype.recalculateLightbox = function(index) {
-    this.imageWidth = Math.min(utils.calculateViewportWidth(), 650);
+    if (utils.calculateViewportWidth() <= 736) {
+      this.imageWidth = 320;
+    } else {
+      this.imageWidth = 650;
+    }
 
     this.imageGallery.style.width = (this.photos.length * this.imageWidth).toString() + 'px';
     this.imageGallery.style.transform = "translate3d(" + index * -this.imageWidth + "px, 0, 0)";
@@ -288,8 +311,10 @@
     var images = this.imageGallery.querySelectorAll('li');
     for (var i = 0; i < images.length - 1; i++) {
       var li = images[i];
-      li.style.left = (li.dataset.index * this.imageWidth).toString() + 'px';
+      li.style.left = (parseInt(li.dataset.index) * this.imageWidth).toString() + 'px';
     }
+
+    // this.imageGallery.style.transition = "all .4s ease";
   };
 
   Gallery.prototype.addCurrentImage = function() {
@@ -369,9 +394,8 @@
   };
 
   Gallery.prototype.afterShowNewImage = function() {
-    console.log(this.currentImage);
     this.setTitle(this.currentImage.dataset.title);
-    this.imageGallery.style.transform = "translate3d(" + this.currentIndex * -this.imageWidth + "px, 0, 0)";
+    this.imageGallery.style.transform = "translate3d(" + (this.currentIndex * -this.imageWidth) + "px, 0, 0)";
     this.imageGallery.style.transition = "all .4s ease";
   };
 
@@ -380,26 +404,62 @@
     p.textContent = text;
   };
 
-  Gallery.prototype.attachCloseEvents = function(lightbox) {
-    var self = this,
-        close = document.getElementById('lightbox--close'),
-        overlay = document.getElementById('lightbox--overlay');
+  Gallery.prototype.keyupHandler = function() {
+    var keyCode = event.which || event.keyCode || 0;
+    switch (keyCode) {
+      case 27:
+        this.hideAndResetLightbox();
+        break;
+      case 37:
+        this.showPrev();
+        break;
+      case 39:
+        this.showNext();
+        break;
+      default:
+        break;
+    }
+  };
 
-    close.addEventListener('click', function() {
-      lightbox.classList.remove('active');
+  Gallery.prototype.resizeHandler = function() {
+    var self = this;
+    utils.debounce(function() {
+      self.recalculateLightbox(self.currentIndex);
+    }, 250);
+  };
 
-      // reset lightbox display information
-      self.imageGallery.innerHTML = "";
-      self.loadedImages = {};
-    });
+  Gallery.prototype.attachEvents = function() {
+    this.prev.addEventListener('click', this.showPrev, false);
+    this.next.addEventListener('click', this.showNext, false);
+    this.close.addEventListener('click', this.hideAndResetLightbox, false);
+    this.overlay.addEventListener('click', this.hideAndResetLightbox, false);
+    window.addEventListener('keyup', this.keyupHandler, false);
+    window.addEventListener('resize', this.resizeHandler, false);
+  };
 
-    overlay.addEventListener('click', function() {
-      lightbox.classList.remove('active');
+  Gallery.prototype.removeEvents = function() {
+    this.prev.removeEventListener('click', this.showPrev);
+    this.next.removeEventListener('click', this.showNext);
+    this.close.removeEventListener('click', this.closeHandler);
+    this.overlay.removeEventListener('click', this.closeHandler);
+    window.removeEventListener('keyup', this.eventHandler);
+    window.removeEventListener('resize', this.resizeHandler);
+  };
 
-      // reset lightbox display information
-      self.imageGallery.innerHTML = "";
-      self.loadedImages = {};
-    });
+  Gallery.prototype.hideAndResetLightbox = function() {
+    this.lightbox.classList.remove('active');
+
+    // reset lightbox display information
+    this.imageGallery.innerHTML = "";
+    this.loadedImages = {};
+  };
+
+  Gallery.prototype.setImageWidth = function() {
+    if (utils.calculateViewportWidth() <= 736) {
+      this.imageWidth = 320;
+    } else {
+      this.imageWidth = 650;
+    }
   };
 
   Gallery.prototype.generateThumbnailGallery = function(el) {

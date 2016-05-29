@@ -33,6 +33,7 @@ module.exports = function (grunt) {
       scripts: {
         files: [
           'js/utils.js',
+          'js/lightbox.js',
           'js/gallery.js',
           'js/main.js'
         ],
@@ -99,6 +100,7 @@ module.exports = function (grunt) {
       js: {
         src: [
           'js/utils.js',
+          'js/lightbox.js',
           'js/gallery.js',
           'js/main.js'
         ],

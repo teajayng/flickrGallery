@@ -49,9 +49,12 @@
     }
 
     if (typeof XMLHttpRequest !== 'undefined') {
-      // we could probably do without this check since it's fairly well
-      // supported in modern browsers
       xhr = new XMLHttpRequest();
+    } else {
+      // not going to implement the fallbacks at this time
+      // because support is good enough
+      // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
+      return;
     }
 
     xhr.onreadystatechange = function() {
