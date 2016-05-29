@@ -23,7 +23,7 @@ module.exports = function (grunt) {
 
       sass: {
         files: [
-          'sass/*.scss'
+          'scss/*.scss'
         ],
         tasks: [
           'sasslint', 'sass'
@@ -86,7 +86,7 @@ module.exports = function (grunt) {
     sass: {
       dist: {
         files: {
-          'styles/style.css' : 'sass/style.scss'
+          'styles/style.css' : 'scss/style.scss'
         }
       }
     },
@@ -107,7 +107,9 @@ module.exports = function (grunt) {
     },
 
     sasslint: {
-      target: [ 'sass/*.scss' ]
+      target: [
+        'scss/*.scss'
+      ]
     },
 
     jshint: {

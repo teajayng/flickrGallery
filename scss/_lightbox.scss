@@ -1,0 +1,197 @@
+#lightbox {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  visibility: hidden;
+
+  width: 100%;
+  height: 100%;
+
+  align-items: center;
+  justify-content: center;
+
+  .lightbox--wrapper {
+    display: flex;
+    position: relative;
+
+    background-color: $white-with-alpha;
+
+    padding: 30px 30px 10px;
+
+    width: 100%;
+    height: auto;
+
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  img {
+    max-width: 650px;
+    max-height: 440px;
+  }
+
+  &.active {
+    display: flex;
+
+    visibility: visible;
+  }
+
+  &:before {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    background-color: $overlay;
+
+    width: 100%;
+    height: 100%;
+
+    content: '';
+  }
+}
+
+#lightbox--image-gallery {
+  transition: all .4s ease;
+
+  margin: 0;
+
+  padding: 0;
+
+  list-style: none;
+
+  li {
+    display: block;
+
+    float: left;
+
+    width: 650px;
+
+    text-align: center;
+  }
+}
+
+.lightbox--image-mask {
+  position: relative;
+
+  width: 650px;
+  height: 440px;
+
+  overflow: hidden;
+}
+
+#lightbox--close {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+
+  opacity: .7;
+
+  cursor: pointer;
+
+  text-transform: uppercase;
+
+  color: $close-text;
+
+  font-size: .8em;
+
+  &:after {
+    display: inline-block;
+
+    margin-top: 1px;
+    margin-left: 5px;
+
+    background-image: $close-icon;
+    background-repeat: no-repeat;
+    background-size: 1.5em;
+
+    width: 1.5em;
+    height: 1.5em;
+
+    vertical-align: top;
+
+    content: '';
+  }
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+#lightbox--prev,
+#lightbox--next {
+  display: flex;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+
+  z-index: 1;
+
+  cursor: pointer;
+
+  width: 120px;
+  height: 100%;
+
+  justify-content: center;
+  align-items: center;
+  -webkit-tap-highlight-color: transparent;
+
+  &:before {
+    display: block;
+
+    opacity: .3;
+
+    margin-top: -3px;
+
+    background-position: center;
+    background-size: 58px;
+
+    width: 90px;
+    height: 409px;
+
+    vertical-align: middle;
+
+    text-align: center;
+
+    content: '';
+  }
+
+  &:hover {
+
+    &:before {
+      transition: all .3s ease;
+
+      opacity: 1;
+
+      background-color: $arrow-background-color;
+    }
+  }
+
+  &.inactive {
+    display: none;
+  }
+}
+
+#lightbox--prev {
+  left: 0;
+
+  &:before {
+    background-image: $left-arrow;
+    background-repeat: no-repeat;
+  }
+}
+
+#lightbox--next {
+  right: 0;
+
+  &:before {
+    background-image: $right-arrow;
+    background-repeat: no-repeat;
+  }
+}
+
+// @media screen and (min-width: 1032px) {
+// }

@@ -1,15 +1,41 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>teajayng | flickr gallery</title>
-    <meta name="description" content="flickr gallery code exercise">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="styles/normalize.css">
-    <link rel="stylesheet" type="text/css" href="styles/style.css">
-  </head>
-  <body>
-    <script type="text/javascript" src="scripts/main.js"></script>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>teajayng | flickr gallery</title>
+  <meta name="description" content="flickr gallery code exercise">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="styles/normalize.css">
+  <link rel="stylesheet" type="text/css" href="styles/style.css">
+</head>
+<body>
+  <section class="page-wrapper">
+    <header>
+      <h1>flickr gallery</h1>
+    </header>
+
+    <section class="content-wrapper">
+      <ul id="thumbnail-gallery"></ul>
+    </section>
+
+    <section id="lightbox">
+      <section class="lightbox--wrapper">
+        <span id="lightbox--close">close</span>
+
+        <section class="lightbox--image-mask">
+          <div id="lightbox--prev"></div>
+          <div id="lightbox--next"></div>
+
+          <ul id="lightbox--image-gallery"></ul>
+        </section>
+      </section>
+    </section>
+  </section>
+
+  <footer>&copy; 2016 teajayng.com</footer>
+
+  <script src="//localhost:35729/livereload.js"></script>
+  <script type="text/javascript" src="scripts/main.js"></script>
+</body>
 </html>
