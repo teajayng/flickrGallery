@@ -61,7 +61,7 @@
   padding: 0;
 
   list-style: none;
-  // transition: all .4s ease;
+
   li {
     display: flex;
 
@@ -93,6 +93,10 @@
 
   cursor: pointer;
 
+  width: 1.4em;
+  height: 1.4em;
+
+  text-indent: -9999px;
   text-transform: uppercase;
 
   color: $gray-text;
@@ -101,16 +105,16 @@
 
   &:after {
     display: inline-block;
-
-    margin-top: 1px;
-    margin-left: 5px;
+    position: absolute;
+    top: 0;
+    left: 0;
 
     background-image: $close-icon;
     background-repeat: no-repeat;
-    background-size: 1.5em;
+    background-size: 1.4em;
 
-    width: 1.5em;
-    height: 1.5em;
+    width: 1.4em;
+    height: 1.4em;
 
     vertical-align: top;
 
@@ -127,11 +131,11 @@
   display: flex;
   position: absolute;
   top: 30px;
-  bottom: 30px;
+  bottom: 60px;
 
   z-index: 1;
 
-  background-color: $arrow-background-color;
+  background-color: transparent;
   cursor: pointer;
 
   width: 100px;
@@ -258,7 +262,7 @@
 
     color: $gray-text;
 
-    font-size: .8em;
+    font-size: 2em;
 
     span {
       display: none;
@@ -270,11 +274,11 @@
   }
 
   #lightbox--prev {
-    left: 5px;
+    left: 25px;
   }
 
   #lightbox--next {
-    right: 5px;
+    right: 25px;
   }
 
   #lightbox--close {

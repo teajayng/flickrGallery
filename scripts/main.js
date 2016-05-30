@@ -2,7 +2,6 @@
   'use strict';
 
   var apiKey = '6569236893a124291e840668242de95b',
-  photosetId = '72157664867464591',
   userId = '44738776@N00';
 
   function extend(object) {
@@ -63,9 +62,7 @@
       }
 
       if (this.status !== 200) {
-        // if (window.console) {
-        //   console.log('Error', xhr);
-        // }
+        throw "Status code was not a 200";
       }
 
       if (this.readyState === XMLHttpRequest.DONE) {
@@ -108,25 +105,47 @@
     return Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
   }
 
+  function isScrolledToBottom() {
+    var scrollTop = (document.documentElement && document.documentElement.scrollTop) || document.body.scrollTop,
+    scrollHeight = (document.documentElement && document.documentElement.scrollHeight) || document.body.scrollHeight;
+
+    return (scrollTop + window.innerHeight) >= scrollHeight;
+  }
+
+  function testForLocalStorage() {
+    if (getQueryParam('ls') === "0") {
+      return false;
+    }
+
+    try {
+      localStorage.setItem('test', 'test');
+      localStorage.removeItem('test');
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   function noop() {
     // this is a noop!
   }
 
   function getPhotostreamData(opts) {
     var options = extend({
-      // photosetId: photosetId,
       userId: userId,
-      callback: noop
+      page: 1,
+      callback: noop,
+      refreshData: false
     }, opts);
 
     if (!testForLocalStorage()) {
       // local storage unavailable, make GET request
       getFreshPhotostreamData(false, options);
     } else {
-      var key = 'flickr-' + options.userId,
-      lsData = localStorage.getItem('flickr-' + options.userId);
+      var key = 'flickr-' + options.userId + '-' + options.page,
+      lsData = localStorage.getItem(key);
 
-      if (lsData) {
+      if (lsData && !options.refreshData) {
         lsData = JSON.parse(lsData);
 
         var timestamp = lsData.timestamp,
@@ -154,16 +173,19 @@
         api_key: apiKey,
         // photoset_id: options.photosetId,
         user_id: options.userId,
+        page: options.page,
+        per_page: 25,
         format: 'json',
         nojsoncallback: 1
       },
       callback: function(res) {
-        var lsData = {
-          data: JSON.parse(res),
+        var parsedData = JSON.parse(res),
+        lsData = {
+          data: parsedData,
           timestamp: new Date().getTime()
         };
         if (lsAvailable) {
-          var key = 'flickr-' + options.userId;
+          var key = 'flickr-' + options.userId + '-' + options.page;
           localStorage.removeItem(key);
           localStorage.setItem(key, JSON.stringify(lsData));
         }
@@ -172,21 +194,6 @@
         }
       }
     });
-  }
-
-
-  function testForLocalStorage() {
-    if (getQueryParam('ls') === "0") {
-      return false;
-    }
-
-    try {
-      localStorage.setItem('test', 'test');
-      localStorage.removeItem('test');
-      return true;
-    } catch (e) {
-      return false;
-    }
   }
 
   function generateBaseUrl(photo) {
@@ -209,9 +216,9 @@
     extend: extend,
     getQueryParam: getQueryParam,
     get: get,
-    noop: noop,
     debounce: debounce,
     calculateViewportWidth: calculateViewportWidth,
+    isScrolledToBottom: isScrolledToBottom,
 
     getPhotostreamData: getPhotostreamData,
     generateThumbnailUrl: generateThumbnailUrl,
@@ -219,52 +226,53 @@
     generateEmbiggenedPhotoUrl: generateEmbiggenedPhotoUrl
   });
 })(window);
-;// (function(window) {
-//   function Lightbox(currentIndex, photos) {
-//     this.currentIndex = 0;
-//     this.currentImage = null;
-//     this.loadedImages = {};
-
-//     this.imageWidth = 0;
-//     this.setImageWidth();
-
-//     this.prev = document.getElementById('lightbox--prev');
-//     this.next = document.getElementById('lightbox--next');
-//     this.lightbox = document.getElementById('lightbox');
-//     this.imageGallery = document.getElementById('lightbox--image-gallery');
-//   }
-
-//   Lightbox.prototype.show = function(index) {
-//     console.log('trying to show lightbox');
-//   };
-
-//   window.GalleryLightbox = GalleryLightbox;
-// })(window);
 ;(function(window) {
   'use strict';
 
-  function Gallery(photos) {
+  var userId = '44738776@N00';
+
+  function Gallery(photos, container) {
     this.photos = photos;
+    this.container = container;
 
     this.currentIndex = 0;
     this.currentImage = null;
     this.loadedImages = {};
 
+    this.page = 1;
+    this.pages = 1;
+
     this.imageWidth = 0;
     this.setImageWidth();
 
+    this.initElements();
+    this.rebindHandlers();
+  }
+
+  Gallery.prototype.initElements = function() {
     this.prev = document.getElementById('lightbox--prev');
     this.next = document.getElementById('lightbox--next');
     this.close = document.getElementById('lightbox--close');
     this.overlay = document.getElementById('lightbox--overlay');
     this.lightbox = document.getElementById('lightbox');
     this.imageGallery = document.getElementById('lightbox--image-gallery');
+  };
 
+  Gallery.prototype.rebindHandlers = function() {
     this.keyupHandler = this.keyupHandler.bind(this);
     this.resizeHandler = this.resizeHandler.bind(this);
+    this.hideAndResetLightbox = this.hideAndResetLightbox.bind(this);
     this.showPrev = this.showPrev.bind(this);
     this.showNext = this.showNext.bind(this);
-  }
+
+    var scrollHandler = utils.debounce(function() {
+      if (utils.isScrolledToBottom()) {
+        this.getNextPage();
+      }
+    }, 300);
+    scrollHandler = scrollHandler.bind(this);
+    window.addEventListener('scroll', scrollHandler, false);
+  };
 
   Gallery.prototype.showLightbox = function(index) {
     var self = this;
@@ -277,8 +285,8 @@
     this.setTitle(this.currentImage.dataset.title);
 
     this.imageGallery.style.width = (this.photos.length * this.imageWidth).toString() + 'px';
-    this.imageGallery.style.transform = "translate3d(" + index * -this.imageWidth + "px, 0, 0)";
-    this.imageGallery.style.transition = "all .4s ease";
+    this.imageGallery.style.transform = 'translate3d(' + index * -this.imageWidth + 'px, 0, 0)';
+    this.imageGallery.style.transition = 'all .4s ease';
 
     if (this.currentIndex > 0) {
       this.prev.classList.remove('inactive');
@@ -286,7 +294,7 @@
       this.prev.classList.add('inactive');
     }
 
-    if (this.currentIndex < this.photos.length - 1) {
+    if (this.currentIndex < this.photos.length - 1 || this.page < this.pages) {
       this.next.classList.remove('inactive');
     } else {
       this.next.classList.add('inactive');
@@ -305,16 +313,15 @@
     }
 
     this.imageGallery.style.width = (this.photos.length * this.imageWidth).toString() + 'px';
-    this.imageGallery.style.transform = "translate3d(" + index * -this.imageWidth + "px, 0, 0)";
+    this.imageGallery.style.transform = 'translate3d(' + index * -this.imageWidth + 'px, 0, 0)';
     this.imageGallery.style.transition = null;
 
-    var images = this.imageGallery.querySelectorAll('li');
-    for (var i = 0; i < images.length - 1; i++) {
-      var li = images[i];
-      li.style.left = (parseInt(li.dataset.index) * this.imageWidth).toString() + 'px';
+    var images = this.imageGallery.children;
+    for (var i = 0; i < images.length; i++) {
+      var li = images[i],
+      newPos = parseInt(li.dataset.index) * this.imageWidth;
+      li.style.left = newPos.toString() + 'px';
     }
-
-    // this.imageGallery.style.transition = "all .4s ease";
   };
 
   Gallery.prototype.addCurrentImage = function() {
@@ -330,6 +337,10 @@
   Gallery.prototype.addNextImage = function() {
     if (this.currentIndex < this.photos.length - 1) {
       this.addImage(this.currentIndex + 1);
+    } else {
+      if (this.page < this.pages) {
+        this.getNextPageAndAddImage();
+      }
     }
   };
 
@@ -345,7 +356,7 @@
     img.src = utils.generateEmbiggenedPhotoUrl(this.photos[index]);
     img.alt = this.photos[index].title;
     img.title = this.photos[index].title;
-    li.style.position = "absolute";
+    li.style.position = 'absolute';
     li.style.left = (index * this.imageWidth).toString() + 'px';
     li.dataset.title = this.photos[index].title;
 
@@ -395,8 +406,8 @@
 
   Gallery.prototype.afterShowNewImage = function() {
     this.setTitle(this.currentImage.dataset.title);
-    this.imageGallery.style.transform = "translate3d(" + (this.currentIndex * -this.imageWidth) + "px, 0, 0)";
-    this.imageGallery.style.transition = "all .4s ease";
+    this.imageGallery.style.transform = 'translate3d(' + this.currentIndex * -this.imageWidth + 'px, 0, 0)';
+    this.imageGallery.style.transition = 'all .4s ease';
   };
 
   Gallery.prototype.setTitle = function(text) {
@@ -421,12 +432,9 @@
     }
   };
 
-  Gallery.prototype.resizeHandler = function() {
-    var self = this;
-    utils.debounce(function() {
-      self.recalculateLightbox(self.currentIndex);
-    }, 250);
-  };
+  Gallery.prototype.resizeHandler = utils.debounce(function() {
+    this.recalculateLightbox(this.currentIndex);
+  }, 250);
 
   Gallery.prototype.attachEvents = function() {
     this.prev.addEventListener('click', this.showPrev, false);
@@ -450,7 +458,9 @@
     this.lightbox.classList.remove('active');
 
     // reset lightbox display information
-    this.imageGallery.innerHTML = "";
+    this.imageGallery.innerHTML = '';
+    this.currentIndex = 0;
+    this.currentImage = null;
     this.loadedImages = {};
   };
 
@@ -462,7 +472,9 @@
     }
   };
 
-  Gallery.prototype.generateThumbnailGallery = function(el) {
+  Gallery.prototype.generateThumbnailGallery = function(photos) {
+    photos = typeof photos !== 'undefined' ? photos : this.photos;
+
     function eventHandler(index, gallery) {
       return function(event) {
         event.preventDefault();
@@ -475,14 +487,14 @@
     link,
     listItem;
 
-    for (var i = 0; i < this.photos.length; i++) {
-      data = this.photos[i];
+    for (var i = 0; i < photos.length; i++) {
+      data = photos[i];
       img = document.createElement('img');
 
-      img.src = utils.generateThumbnailUrl(this.photos[i]);
+      img.src = utils.generateThumbnailUrl(photos[i]);
       img.classList.add('thumbnail');
-      img.title = this.photos[i].title;
-      img.alt = this.photos[i].title;
+      img.title = photos[i].title;
+      img.alt = photos[i].title;
 
       link = document.createElement('a');
       link.href = img.src;
@@ -492,7 +504,45 @@
       listItem = document.createElement('li');
       listItem.appendChild(link);
 
-      el.appendChild(listItem);
+      this.container.appendChild(listItem);
+    }
+  };
+
+  Gallery.prototype.getNextPage = function(page) {
+    var afterGettingNextPage = this.afterGettingNextPage.bind(this);
+
+    if (typeof page === 'undefined') {
+      if (this.page < this.pages) {
+        page = this.page++;
+      }
+    }
+
+    utils.getPhotostreamData({
+      page: page,
+      callback: afterGettingNextPage
+    });
+  };
+
+  Gallery.prototype.getNextPageAndAddImage = function() {
+    this.page++;
+    var afterGettingNextPage = this.afterGettingNextPage.bind(this);
+
+    utils.getPhotostreamData({
+      page: this.page,
+      callback: afterGettingNextPage
+    });
+  };
+
+  Gallery.prototype.afterGettingNextPage = function(res) {
+    try {
+      var photos = res.data.photos.photo;
+      this.generateThumbnailGallery(photos);
+
+      // update stored image data
+      this.photos = this.photos.concat(photos);
+      this.addNextImage();
+    } catch (e) {
+      // handle errors
     }
   };
 
@@ -501,30 +551,61 @@
 ;(function(window) {
   'use strict';
 
-  var flickrGallery,
-      page = 1,
-      pages = 1;
+  var flickrGallery;
 
   function init() {
     utils.getPhotostreamData({
       callback: function(res) {
-        if (res && res.data) {
-          pages = res.data.photos.pages;
+        var container = document.getElementById('thumbnail-gallery');
+        container.classList.remove('error');
 
+        try {
           var photos = res.data.photos.photo,
-              container = document.getElementById('thumbnail-gallery'),
               flickrGallery = new Gallery(photos, container);
 
-          flickrGallery.generateThumbnailGallery(container);
+          flickrGallery.pages = res.data.photos.pages;
+          flickrGallery.generateThumbnailGallery();
 
-          // if (photoset.title && photoset.ownername) {
-          //   var header = document.querySelector('.page-wrapper header h1');
-          //   header.textContent += " - " + photoset.title;
+          var refreshDataEl = document.getElementById('refresh-data'),
+          refreshDataElText = refreshDataEl.textContent,
+          refreshData = function() {
+            var afterRefresh = function(res) {
+              this.container.classList.remove('error');
+              refreshDataEl.classList.remove('refreshing');
+              refreshDataEl.textContent = refreshDataElText;
 
-          //   var subtitle = document.createElement('p');
-          //   subtitle.textContent = "photoset by " + photoset.ownername;
-          //   document.querySelector('.page-wrapper header').appendChild(subtitle);
-          // }
+              try {
+                this.photos = res.data.photos.photo;
+                while (this.container.hasChildNodes()) {
+                  this.container.removeChild(this.container.firstChild);
+                }
+                this.generateThumbnailGallery();
+
+                if (this.page > 1) {
+                  for (var i = 2; i <= this.page; i++) {
+                    this.getNextPage(i);
+                  }
+                }
+              } catch (e) {
+                this.container.classList.add('error');
+                this.container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the data.</p>';
+              }
+            };
+            afterRefresh = afterRefresh.bind(this);
+
+            refreshDataEl.classList.add('refreshing');
+            refreshDataEl.textContent = 'refreshing...';
+
+            utils.getPhotostreamData({
+              refreshData: true,
+              callback: afterRefresh
+            });
+          };
+          refreshData = refreshData.bind(flickrGallery);
+          refreshDataEl.addEventListener('click', refreshData, false);
+        } catch (e) {
+          container.classList.add('error');
+          container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the data.</p>';
         }
       }
     });

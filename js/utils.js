@@ -2,7 +2,6 @@
   'use strict';
 
   var apiKey = '6569236893a124291e840668242de95b',
-  photosetId = '72157664867464591',
   userId = '44738776@N00';
 
   function extend(object) {
@@ -63,9 +62,7 @@
       }
 
       if (this.status !== 200) {
-        // if (window.console) {
-        //   console.log('Error', xhr);
-        // }
+        throw "Status code was not a 200";
       }
 
       if (this.readyState === XMLHttpRequest.DONE) {
@@ -108,25 +105,47 @@
     return Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
   }
 
+  function isScrolledToBottom() {
+    var scrollTop = (document.documentElement && document.documentElement.scrollTop) || document.body.scrollTop,
+    scrollHeight = (document.documentElement && document.documentElement.scrollHeight) || document.body.scrollHeight;
+
+    return (scrollTop + window.innerHeight) >= scrollHeight;
+  }
+
+  function testForLocalStorage() {
+    if (getQueryParam('ls') === "0") {
+      return false;
+    }
+
+    try {
+      localStorage.setItem('test', 'test');
+      localStorage.removeItem('test');
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   function noop() {
     // this is a noop!
   }
 
   function getPhotostreamData(opts) {
     var options = extend({
-      // photosetId: photosetId,
       userId: userId,
-      callback: noop
+      page: 1,
+      callback: noop,
+      refreshData: false
     }, opts);
 
     if (!testForLocalStorage()) {
       // local storage unavailable, make GET request
       getFreshPhotostreamData(false, options);
     } else {
-      var key = 'flickr-' + options.userId,
-      lsData = localStorage.getItem('flickr-' + options.userId);
+      var key = 'flickr-' + options.userId + '-' + options.page,
+      lsData = localStorage.getItem(key);
 
-      if (lsData) {
+      if (lsData && !options.refreshData) {
         lsData = JSON.parse(lsData);
 
         var timestamp = lsData.timestamp,
@@ -154,16 +173,19 @@
         api_key: apiKey,
         // photoset_id: options.photosetId,
         user_id: options.userId,
+        page: options.page,
+        per_page: 25,
         format: 'json',
         nojsoncallback: 1
       },
       callback: function(res) {
-        var lsData = {
-          data: JSON.parse(res),
+        var parsedData = JSON.parse(res),
+        lsData = {
+          data: parsedData,
           timestamp: new Date().getTime()
         };
         if (lsAvailable) {
-          var key = 'flickr-' + options.userId;
+          var key = 'flickr-' + options.userId + '-' + options.page;
           localStorage.removeItem(key);
           localStorage.setItem(key, JSON.stringify(lsData));
         }
@@ -172,21 +194,6 @@
         }
       }
     });
-  }
-
-
-  function testForLocalStorage() {
-    if (getQueryParam('ls') === "0") {
-      return false;
-    }
-
-    try {
-      localStorage.setItem('test', 'test');
-      localStorage.removeItem('test');
-      return true;
-    } catch (e) {
-      return false;
-    }
   }
 
   function generateBaseUrl(photo) {
@@ -209,9 +216,9 @@
     extend: extend,
     getQueryParam: getQueryParam,
     get: get,
-    noop: noop,
     debounce: debounce,
     calculateViewportWidth: calculateViewportWidth,
+    isScrolledToBottom: isScrolledToBottom,
 
     getPhotostreamData: getPhotostreamData,
     generateThumbnailUrl: generateThumbnailUrl,

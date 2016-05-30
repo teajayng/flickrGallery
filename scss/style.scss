@@ -1,4 +1,5 @@
 @import 'variables';
+@import 'animation';
 @import 'layout';
 @import 'lightbox';
 
@@ -11,12 +12,138 @@ body {
 }
 
 header {
+  position: relative;
+
   border-bottom: 2px solid $background-color;
 
   h1 {
     letter-spacing: 1px;
 
     font-weight: 300;
+  }
+}
+
+header,
+footer {
+  padding: 1.4em;
+}
+
+nav {
+  position: absolute;
+  top: 1.4em;
+  right: 1.4em;
+
+  .menu-icon {
+    display: inline-block;
+    position: relative;
+
+    margin-top: 1.5em;
+
+    border-top: .25em solid $menu-color;
+    border-bottom: .25em solid $menu-color;
+
+    width: 2em;
+    height: 1.2em;
+
+    text-indent: -9999px;
+
+    &:before {
+      position: absolute;
+      top: .25em;
+      left: 0;
+
+      border-top: .25em solid $menu-color;
+
+      width: 100%;
+
+      content: '';
+    }
+
+    &:hover {
+
+      ul {
+        display: block;
+      }
+    }
+  }
+
+  ul {
+    display: none;
+    position: absolute;
+    top: 1em;
+    right: 0;
+
+    margin: 0;
+
+    padding: 0;
+
+    list-style: none;
+
+    text-indent: 0;
+
+    li {
+      display: block;
+    }
+  }
+}
+
+#refresh-data {
+  cursor: pointer;
+
+  width: 10em;
+
+  text-align: right;
+
+  span {
+    display: inline-block;
+    position: relative;
+    top: 0;
+    left: 0;
+
+    margin-right: 7px;
+
+    border: .2em solid $gray-text;
+    border-top: .2em solid transparent;
+    border-right: .2em solid $gray-text;
+    border-bottom: .2em solid $gray-text;
+    border-radius: 50%;
+
+    width: 1em;
+    height: 1em;
+
+    vertical-align: middle;
+
+    &:after {
+      display: block;
+      position: absolute;
+      top: -.3em;
+      left: .75em;
+
+      transform: translate(-15px, 0) rotate(45deg);
+
+      border-width: 0 .4em .4em;
+      border-style: solid;
+      border-color: transparent transparent $gray-text;
+
+      width: 0;
+      height: 0;
+
+      content: ' ';
+    }
+  }
+
+  &:hover {
+    color: $red;
+
+    span {
+      animation: rotate 2.5s linear infinite;
+    }
+  }
+
+  &.refreshing {
+    &:hover {
+      color: $green;
+    }
   }
 }
 
@@ -61,6 +188,10 @@ header {
       display: block;
     }
   }
+
+  &.error {
+    flex-direction: column;
+  }
 }
 
 .thumbnail {
@@ -85,11 +216,6 @@ footer {
   height: 64px;
 
   font-weight: 500;
-}
-
-header,
-footer {
-  padding: 20px;
 }
 
 p {

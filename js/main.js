@@ -1,30 +1,61 @@
 (function(window) {
   'use strict';
 
-  var flickrGallery,
-      page = 1,
-      pages = 1;
+  var flickrGallery;
 
   function init() {
     utils.getPhotostreamData({
       callback: function(res) {
-        if (res && res.data) {
-          pages = res.data.photos.pages;
+        var container = document.getElementById('thumbnail-gallery');
+        container.classList.remove('error');
 
+        try {
           var photos = res.data.photos.photo,
-              container = document.getElementById('thumbnail-gallery'),
               flickrGallery = new Gallery(photos, container);
 
-          flickrGallery.generateThumbnailGallery(container);
+          flickrGallery.pages = res.data.photos.pages;
+          flickrGallery.generateThumbnailGallery();
 
-          // if (photoset.title && photoset.ownername) {
-          //   var header = document.querySelector('.page-wrapper header h1');
-          //   header.textContent += " - " + photoset.title;
+          var refreshDataEl = document.getElementById('refresh-data'),
+          refreshDataElText = refreshDataEl.textContent,
+          refreshData = function() {
+            var afterRefresh = function(res) {
+              this.container.classList.remove('error');
+              refreshDataEl.classList.remove('refreshing');
+              refreshDataEl.textContent = refreshDataElText;
 
-          //   var subtitle = document.createElement('p');
-          //   subtitle.textContent = "photoset by " + photoset.ownername;
-          //   document.querySelector('.page-wrapper header').appendChild(subtitle);
-          // }
+              try {
+                this.photos = res.data.photos.photo;
+                while (this.container.hasChildNodes()) {
+                  this.container.removeChild(this.container.firstChild);
+                }
+                this.generateThumbnailGallery();
+
+                if (this.page > 1) {
+                  for (var i = 2; i <= this.page; i++) {
+                    this.getNextPage(i);
+                  }
+                }
+              } catch (e) {
+                this.container.classList.add('error');
+                this.container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the data.</p>';
+              }
+            };
+            afterRefresh = afterRefresh.bind(this);
+
+            refreshDataEl.classList.add('refreshing');
+            refreshDataEl.textContent = 'refreshing...';
+
+            utils.getPhotostreamData({
+              refreshData: true,
+              callback: afterRefresh
+            });
+          };
+          refreshData = refreshData.bind(flickrGallery);
+          refreshDataEl.addEventListener('click', refreshData, false);
+        } catch (e) {
+          container.classList.add('error');
+          container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the data.</p>';
         }
       }
     });

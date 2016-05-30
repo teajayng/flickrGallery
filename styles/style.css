@@ -1,3 +1,8 @@
+@keyframes rotate {
+  from {
+    transform: rotate(0deg); }
+  to {
+    transform: rotate(360deg); } }
 html {
   box-sizing: border-box; }
 
@@ -71,18 +76,22 @@ body {
   right: 5px;
   opacity: .7;
   cursor: pointer;
+  width: 1.4em;
+  height: 1.4em;
+  text-indent: -9999px;
   text-transform: uppercase;
   color: #aaaaaa;
   font-size: .8em; }
   #lightbox--close:after {
     display: inline-block;
-    margin-top: 1px;
-    margin-left: 5px;
+    position: absolute;
+    top: 0;
+    left: 0;
     background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgOTYgOTYiIHhtbDpzcGFjZT0icHJlc2VydmUiPjxwb2x5Z29uIGZpbGw9IiNBQUFBQUIiIHBvaW50cz0iOTYsMTQgODIsMCA0OCwzNCAxNCwwIDAsMTQgMzQsNDggMCw4MiAxNCw5NiA0OCw2MiA4Miw5NiA5Niw4MiA2Miw0OCAiLz48L3N2Zz4=");
     background-repeat: no-repeat;
-    background-size: 1.5em;
-    width: 1.5em;
-    height: 1.5em;
+    background-size: 1.4em;
+    width: 1.4em;
+    height: 1.4em;
     vertical-align: top;
     content: ''; }
   #lightbox--close:hover {
@@ -93,9 +102,9 @@ body {
   display: flex;
   position: absolute;
   top: 30px;
-  bottom: 30px;
+  bottom: 60px;
   z-index: 1;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: transparent;
   cursor: pointer;
   width: 100px;
   height: auto;
@@ -172,7 +181,7 @@ body {
     text-indent: 0;
     text-transform: uppercase;
     color: #aaaaaa;
-    font-size: .8em; }
+    font-size: 2em; }
     #lightbox--prev span,
     #lightbox--next span {
       display: none;
@@ -180,10 +189,10 @@ body {
       background-image: none; }
 
   #lightbox--prev {
-    left: 5px; }
+    left: 25px; }
 
   #lightbox--next {
-    right: 5px; }
+    right: 25px; }
 
   #lightbox--close {
     opacity: 1; } }
@@ -194,10 +203,86 @@ body {
   font-size: 16px; }
 
 header {
+  position: relative;
   border-bottom: 2px solid #f4f4f4; }
   header h1 {
     letter-spacing: 1px;
     font-weight: 300; }
+
+header,
+footer {
+  padding: 1.4em; }
+
+nav {
+  position: absolute;
+  top: 1.4em;
+  right: 1.4em; }
+  nav .menu-icon {
+    display: inline-block;
+    position: relative;
+    margin-top: 1.5em;
+    border-top: 0.25em solid #474747;
+    border-bottom: 0.25em solid #474747;
+    width: 2em;
+    height: 1.2em;
+    text-indent: -9999px; }
+    nav .menu-icon:before {
+      position: absolute;
+      top: .25em;
+      left: 0;
+      border-top: 0.25em solid #474747;
+      width: 100%;
+      content: ''; }
+    nav .menu-icon:hover ul {
+      display: block; }
+  nav ul {
+    display: none;
+    position: absolute;
+    top: 1em;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-indent: 0; }
+    nav ul li {
+      display: block; }
+
+#refresh-data {
+  cursor: pointer;
+  width: 10em;
+  text-align: right; }
+  #refresh-data span {
+    display: inline-block;
+    position: relative;
+    top: 0;
+    left: 0;
+    margin-right: 7px;
+    border: 0.2em solid #aaaaaa;
+    border-top: .2em solid transparent;
+    border-right: 0.2em solid #aaaaaa;
+    border-bottom: 0.2em solid #aaaaaa;
+    border-radius: 50%;
+    width: 1em;
+    height: 1em;
+    vertical-align: middle; }
+    #refresh-data span:after {
+      display: block;
+      position: absolute;
+      top: -.3em;
+      left: .75em;
+      transform: translate(-15px, 0) rotate(45deg);
+      border-width: 0 .4em .4em;
+      border-style: solid;
+      border-color: transparent transparent #aaaaaa;
+      width: 0;
+      height: 0;
+      content: ' '; }
+  #refresh-data:hover {
+    color: #fa1919; }
+    #refresh-data:hover span {
+      animation: rotate 2.5s linear infinite; }
+  #refresh-data.refreshing:hover {
+    color: #3cc85a; }
 
 .page-wrapper {
   margin: 0 auto -64px;
@@ -224,6 +309,8 @@ header {
     padding: 5px; }
     #thumbnail-gallery li a {
       display: block; }
+  #thumbnail-gallery.error {
+    flex-direction: column; }
 
 .thumbnail {
   display: block;
@@ -238,10 +325,6 @@ footer {
   background-color: #f4f4f4;
   height: 64px;
   font-weight: 500; }
-
-header,
-footer {
-  padding: 20px; }
 
 p {
   font-size: 1em; }
