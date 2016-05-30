@@ -22,7 +22,7 @@
             var afterRefresh = function(res) {
               this.container.classList.remove('error');
               refreshDataEl.classList.remove('refreshing');
-              refreshDataEl.textContent = refreshDataElText;
+              refreshDataEl.innerHTML = '<span></span>' + refreshDataElText;
 
               try {
                 this.photos = res.data.photos.photo;
@@ -53,9 +53,60 @@
           };
           refreshData = refreshData.bind(flickrGallery);
           refreshDataEl.addEventListener('click', refreshData, false);
+
+          try {
+            var searchInput = document.getElementById('username-search'),
+            searchSubmit = document.getElementById('username-search--submit'),
+            searchHandler = function() {
+              var searchInputText = searchInput.value;
+
+              utils.findByUsername({
+                username: searchInputText,
+                callback: function(res) {
+                  try {
+                    var data = JSON.parse(res);
+                    flickrGallery.userId = data.user.id;
+                    if (data.stat !== 'ok') {
+                      throw data;
+                    } else {
+                      utils.getPhotostreamData({
+                        userId: data.user.id,
+                        callback: function(res) {
+                          try {
+                            var newPhotos = res.data.photos.photo;
+                            while (flickrGallery.container.hasChildNodes()) {
+                              flickrGallery.container.removeChild(flickrGallery.container.firstChild);
+                            }
+                            flickrGallery.generateThumbnailGallery(newPhotos);
+                          } catch (e) {
+                            throw e;
+                          }
+                        }
+                      });
+                    }
+                  } catch (e) {
+                    console.log(e);
+                  }
+                }
+              });
+            };
+
+            searchSubmit.addEventListener('click', searchHandler, false);
+            searchInput.addEventListener('keyup', function() {
+              var keyCode = event.which || event.keyCode || 0;
+              if (keyCode === 13) {
+                searchHandler();
+                var menuCheckbox = document.getElementById('menu-icon--checkbox');
+                menuCheckbox.checked = false;
+              }
+            }, false);
+          } catch (e) {
+            container.classList.add('error');
+            container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the username data.</p>';
+          }
         } catch (e) {
           container.classList.add('error');
-          container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the data.</p>';
+          container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the photostream data.</p>';
         }
       }
     });

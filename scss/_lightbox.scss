@@ -207,18 +207,7 @@
   text-align: center;
 }
 
-@media screen and (max-width: 850px) {
-
-  #lightbox {
-
-    img {
-      max-width: 650px;
-      max-height: 433px;
-    }
-  }
-}
-
-@media screen and (min-width: 0) and (max-width: 736px) {
+@media screen and (max-width: 736px) {
 
   #lightbox {
 

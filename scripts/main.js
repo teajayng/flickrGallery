@@ -212,6 +212,29 @@
     return generateBaseUrl(photo) + '_b.jpg';
   }
 
+  function findByUsername(opts) {
+    var options = extend({
+      username: 'teajayng',
+      callback: noop
+    }, opts);
+
+    utils.get({
+      url: 'https://api.flickr.com/services/rest/',
+      data: {
+        method: 'flickr.people.findByUsername',
+        api_key: apiKey,
+        username: options.username,
+        format: 'json',
+        nojsoncallback: 1
+      },
+      callback: function(res) {
+        if (options.callback && typeof options.callback === "function") {
+          options.callback.call(window, res);
+        }
+      }
+    });
+  }
+
   window.utils = extend(window.utils || {}, {
     extend: extend,
     getQueryParam: getQueryParam,
@@ -223,7 +246,9 @@
     getPhotostreamData: getPhotostreamData,
     generateThumbnailUrl: generateThumbnailUrl,
     generatePhotoUrl: generatePhotoUrl,
-    generateEmbiggenedPhotoUrl: generateEmbiggenedPhotoUrl
+    generateEmbiggenedPhotoUrl: generateEmbiggenedPhotoUrl,
+
+    findByUsername: findByUsername
   });
 })(window);
 ;(function(window) {
@@ -234,6 +259,8 @@
   function Gallery(photos, container) {
     this.photos = photos;
     this.container = container;
+
+    this.userId = null;
 
     this.currentIndex = 0;
     this.currentImage = null;
@@ -509,7 +536,11 @@
   };
 
   Gallery.prototype.getNextPage = function(page) {
-    var afterGettingNextPage = this.afterGettingNextPage.bind(this);
+    var afterGettingNextPage = this.afterGettingNextPage.bind(this),
+    options = {
+      page: this.page,
+      callback: afterGettingNextPage
+    };
 
     if (typeof page === 'undefined') {
       if (this.page < this.pages) {
@@ -517,20 +548,26 @@
       }
     }
 
-    utils.getPhotostreamData({
-      page: page,
-      callback: afterGettingNextPage
-    });
+    if (this.userId) {
+      options.userId = this.userId;
+    }
+
+    utils.getPhotostreamData(options);
   };
 
   Gallery.prototype.getNextPageAndAddImage = function() {
     this.page++;
-    var afterGettingNextPage = this.afterGettingNextPage.bind(this);
-
-    utils.getPhotostreamData({
+    var afterGettingNextPage = this.afterGettingNextPage.bind(this),
+    options = {
       page: this.page,
       callback: afterGettingNextPage
-    });
+    };
+
+    if (this.userId) {
+      options.userId = this.userId;
+    }
+
+    utils.getPhotostreamData(options);
   };
 
   Gallery.prototype.afterGettingNextPage = function(res) {
@@ -572,7 +609,7 @@
             var afterRefresh = function(res) {
               this.container.classList.remove('error');
               refreshDataEl.classList.remove('refreshing');
-              refreshDataEl.textContent = refreshDataElText;
+              refreshDataEl.innerHTML = '<span></span>' + refreshDataElText;
 
               try {
                 this.photos = res.data.photos.photo;
@@ -603,9 +640,60 @@
           };
           refreshData = refreshData.bind(flickrGallery);
           refreshDataEl.addEventListener('click', refreshData, false);
+
+          try {
+            var searchInput = document.getElementById('username-search'),
+            searchSubmit = document.getElementById('username-search--submit'),
+            searchHandler = function() {
+              var searchInputText = searchInput.value;
+
+              utils.findByUsername({
+                username: searchInputText,
+                callback: function(res) {
+                  try {
+                    var data = JSON.parse(res);
+                    flickrGallery.userId = data.user.id;
+                    if (data.stat !== 'ok') {
+                      throw data;
+                    } else {
+                      utils.getPhotostreamData({
+                        userId: data.user.id,
+                        callback: function(res) {
+                          try {
+                            var newPhotos = res.data.photos.photo;
+                            while (flickrGallery.container.hasChildNodes()) {
+                              flickrGallery.container.removeChild(flickrGallery.container.firstChild);
+                            }
+                            flickrGallery.generateThumbnailGallery(newPhotos);
+                          } catch (e) {
+                            throw e;
+                          }
+                        }
+                      });
+                    }
+                  } catch (e) {
+                    console.log(e);
+                  }
+                }
+              });
+            };
+
+            searchSubmit.addEventListener('click', searchHandler, false);
+            searchInput.addEventListener('keyup', function() {
+              var keyCode = event.which || event.keyCode || 0;
+              if (keyCode === 13) {
+                searchHandler();
+                var menuCheckbox = document.getElementById('menu-icon--checkbox');
+                menuCheckbox.checked = false;
+              }
+            }, false);
+          } catch (e) {
+            container.classList.add('error');
+            container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the username data.</p>';
+          }
         } catch (e) {
           container.classList.add('error');
-          container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the data.</p>';
+          container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the photostream data.</p>';
         }
       }
     });

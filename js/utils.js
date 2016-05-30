@@ -212,6 +212,29 @@
     return generateBaseUrl(photo) + '_b.jpg';
   }
 
+  function findByUsername(opts) {
+    var options = extend({
+      username: 'teajayng',
+      callback: noop
+    }, opts);
+
+    utils.get({
+      url: 'https://api.flickr.com/services/rest/',
+      data: {
+        method: 'flickr.people.findByUsername',
+        api_key: apiKey,
+        username: options.username,
+        format: 'json',
+        nojsoncallback: 1
+      },
+      callback: function(res) {
+        if (options.callback && typeof options.callback === "function") {
+          options.callback.call(window, res);
+        }
+      }
+    });
+  }
+
   window.utils = extend(window.utils || {}, {
     extend: extend,
     getQueryParam: getQueryParam,
@@ -223,6 +246,8 @@
     getPhotostreamData: getPhotostreamData,
     generateThumbnailUrl: generateThumbnailUrl,
     generatePhotoUrl: generatePhotoUrl,
-    generateEmbiggenedPhotoUrl: generateEmbiggenedPhotoUrl
+    generateEmbiggenedPhotoUrl: generateEmbiggenedPhotoUrl,
+
+    findByUsername: findByUsername
   });
 })(window);

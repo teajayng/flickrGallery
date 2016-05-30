@@ -7,6 +7,8 @@
     this.photos = photos;
     this.container = container;
 
+    this.userId = null;
+
     this.currentIndex = 0;
     this.currentImage = null;
     this.loadedImages = {};
@@ -281,7 +283,11 @@
   };
 
   Gallery.prototype.getNextPage = function(page) {
-    var afterGettingNextPage = this.afterGettingNextPage.bind(this);
+    var afterGettingNextPage = this.afterGettingNextPage.bind(this),
+    options = {
+      page: this.page,
+      callback: afterGettingNextPage
+    };
 
     if (typeof page === 'undefined') {
       if (this.page < this.pages) {
@@ -289,20 +295,26 @@
       }
     }
 
-    utils.getPhotostreamData({
-      page: page,
-      callback: afterGettingNextPage
-    });
+    if (this.userId) {
+      options.userId = this.userId;
+    }
+
+    utils.getPhotostreamData(options);
   };
 
   Gallery.prototype.getNextPageAndAddImage = function() {
     this.page++;
-    var afterGettingNextPage = this.afterGettingNextPage.bind(this);
-
-    utils.getPhotostreamData({
+    var afterGettingNextPage = this.afterGettingNextPage.bind(this),
+    options = {
       page: this.page,
       callback: afterGettingNextPage
-    });
+    };
+
+    if (this.userId) {
+      options.userId = this.userId;
+    }
+
+    utils.getPhotostreamData(options);
   };
 
   Gallery.prototype.afterGettingNextPage = function(res) {
