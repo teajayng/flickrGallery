@@ -282,6 +282,10 @@
 
       this.container.appendChild(listItem);
     }
+
+    if (utils.isScrolledToBottom()) {
+      this.getNextPage();
+    }
   };
 
   Gallery.prototype.getNextPage = function(page) {

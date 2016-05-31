@@ -401,6 +401,8 @@ p {
     position: absolute;
     top: 3em;
     right: 0;
+    padding-top: .3em;
+    padding-right: 0;
     width: 500px; } }
 @media screen and (max-width: 414px) {
   #thumbnail-gallery a {
