@@ -43,34 +43,32 @@
     var refreshDataEl = document.getElementById('refresh-data'),
     refreshDataElText = refreshDataEl.textContent,
     refreshData = function() {
-      var afterRefresh = function(res) {
-        this.container.classList.remove('error');
-        refreshDataEl.classList.remove('refreshing');
-        refreshDataEl.innerHTML = '<span></span>' + refreshDataElText;
-
-        try {
-          this.photos = res.data.photos.photo;
-          utils.clearChildrenElements(this.container);
-          this.generateThumbnailGallery();
-
-          if (this.page > 1) {
-            for (var i = 2; i <= this.page; i++) {
-              this.getNextPage(i);
-            }
-          }
-        } catch (e) {
-          this.container.classList.add('error');
-          this.container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the data.</p>';
-        }
-      };
-      afterRefresh = afterRefresh.bind(this);
-
       refreshDataEl.classList.add('refreshing');
       refreshDataEl.textContent = 'refreshing...';
 
       utils.getPhotostreamData({
         refreshData: true,
-        callback: afterRefresh
+        context: this,
+        callback: function(res) {
+          this.container.classList.remove('error');
+          refreshDataEl.classList.remove('refreshing');
+          refreshDataEl.innerHTML = '<span></span>' + refreshDataElText;
+
+          try {
+            this.photos = res.data.photos.photo;
+            utils.clearChildrenElements(this.container);
+            this.generateThumbnailGallery();
+
+            if (this.page > 1) {
+              for (var i = 2; i <= this.page; i++) {
+                this.getNextPage(i);
+              }
+            }
+          } catch (e) {
+            this.container.classList.add('error');
+            this.container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the data.</p>';
+          }
+        }
       });
     };
 

@@ -143,6 +143,7 @@
     var options = extend({
       userId: userId,
       page: 1,
+      context: window,
       callback: noop,
       refreshData: false
     }, opts);
@@ -164,7 +165,7 @@
           getFreshPhotostreamData(true, options);
         } else {
           if (options.callback && typeof options.callback === "function") {
-            options.callback.call(window, lsData);
+            options.callback.call(options.context, lsData);
           }
         }
       } else {
@@ -183,7 +184,7 @@
         // photoset_id: options.photosetId,
         user_id: options.userId,
         page: options.page,
-        per_page: 25,
+        per_page: 10,
         format: 'json',
         nojsoncallback: 1
       },
@@ -199,7 +200,7 @@
           localStorage.setItem(key, JSON.stringify(lsData));
         }
         if (options.callback && typeof options.callback === "function") {
-          options.callback.call(window, lsData);
+          options.callback.call(options.context, lsData);
         }
       }
     });
@@ -573,7 +574,6 @@
   };
 
   Gallery.prototype.getNextPage = function(page) {
-    var afterGettingNextPage = this.afterGettingNextPage.bind(this);
     this.page++;
     page = typeof page !== 'undefined' ? page : this.page;
 
@@ -581,7 +581,8 @@
       var options = {
         userId: this.userId,
         page: page,
-        callback: afterGettingNextPage
+        context: this,
+        callback: this.afterGettingNextPage
       };
 
       utils.getPhotostreamData(options);
@@ -591,11 +592,11 @@
   Gallery.prototype.getNextPageAndAddImage = function() {
     this.page++;
 
-    var afterGettingNextPage = this.afterGettingNextPage.bind(this),
     options = {
       userId: this.userId,
       page: this.page,
-      callback: afterGettingNextPage
+      context: this,
+      callback: this.afterGettingNextPage
     };
 
     utils.getPhotostreamData(options);
@@ -620,19 +621,6 @@
       try {
         var searchInputText = this.searchInput.value;
 
-        var getPhotostreamDataCallback = function(res) {
-          try {
-            var newPhotos = res.data.photos.photo;
-            utils.clearChildrenElements(this.container);
-            this.photos = newPhotos;
-            this.generateThumbnailGallery(newPhotos);
-          } catch (e) {
-            throw e;
-          }
-        };
-
-        getPhotostreamDataCallback = getPhotostreamDataCallback.bind(this);
-
         utils.findByUsername({
           username: searchInputText,
           context: this,
@@ -648,7 +636,17 @@
 
                 utils.getPhotostreamData({
                   userId: data.user.id,
-                  callback: getPhotostreamDataCallback
+                  context: this,
+                  callback: function(res) {
+                    try {
+                      var newPhotos = res.data.photos.photo;
+                      utils.clearChildrenElements(this.container);
+                      this.photos = newPhotos;
+                      this.generateThumbnailGallery(newPhotos);
+                    } catch (e) {
+                      throw e;
+                    }
+                  }
                 });
               }
             } catch (e) {
@@ -722,34 +720,32 @@
     var refreshDataEl = document.getElementById('refresh-data'),
     refreshDataElText = refreshDataEl.textContent,
     refreshData = function() {
-      var afterRefresh = function(res) {
-        this.container.classList.remove('error');
-        refreshDataEl.classList.remove('refreshing');
-        refreshDataEl.innerHTML = '<span></span>' + refreshDataElText;
-
-        try {
-          this.photos = res.data.photos.photo;
-          utils.clearChildrenElements(this.container);
-          this.generateThumbnailGallery();
-
-          if (this.page > 1) {
-            for (var i = 2; i <= this.page; i++) {
-              this.getNextPage(i);
-            }
-          }
-        } catch (e) {
-          this.container.classList.add('error');
-          this.container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the data.</p>';
-        }
-      };
-      afterRefresh = afterRefresh.bind(this);
-
       refreshDataEl.classList.add('refreshing');
       refreshDataEl.textContent = 'refreshing...';
 
       utils.getPhotostreamData({
         refreshData: true,
-        callback: afterRefresh
+        context: this,
+        callback: function(res) {
+          this.container.classList.remove('error');
+          refreshDataEl.classList.remove('refreshing');
+          refreshDataEl.innerHTML = '<span></span>' + refreshDataElText;
+
+          try {
+            this.photos = res.data.photos.photo;
+            utils.clearChildrenElements(this.container);
+            this.generateThumbnailGallery();
+
+            if (this.page > 1) {
+              for (var i = 2; i <= this.page; i++) {
+                this.getNextPage(i);
+              }
+            }
+          } catch (e) {
+            this.container.classList.add('error');
+            this.container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the data.</p>';
+          }
+        }
       });
     };
 

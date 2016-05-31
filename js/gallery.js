@@ -309,7 +309,6 @@
   };
 
   Gallery.prototype.getNextPage = function(page) {
-    var afterGettingNextPage = this.afterGettingNextPage.bind(this);
     this.page++;
     page = typeof page !== 'undefined' ? page : this.page;
 
@@ -317,7 +316,8 @@
       var options = {
         userId: this.userId,
         page: page,
-        callback: afterGettingNextPage
+        context: this,
+        callback: this.afterGettingNextPage
       };
 
       utils.getPhotostreamData(options);
@@ -327,11 +327,11 @@
   Gallery.prototype.getNextPageAndAddImage = function() {
     this.page++;
 
-    var afterGettingNextPage = this.afterGettingNextPage.bind(this),
     options = {
       userId: this.userId,
       page: this.page,
-      callback: afterGettingNextPage
+      context: this,
+      callback: this.afterGettingNextPage
     };
 
     utils.getPhotostreamData(options);
@@ -356,19 +356,6 @@
       try {
         var searchInputText = this.searchInput.value;
 
-        var getPhotostreamDataCallback = function(res) {
-          try {
-            var newPhotos = res.data.photos.photo;
-            utils.clearChildrenElements(this.container);
-            this.photos = newPhotos;
-            this.generateThumbnailGallery(newPhotos);
-          } catch (e) {
-            throw e;
-          }
-        };
-
-        getPhotostreamDataCallback = getPhotostreamDataCallback.bind(this);
-
         utils.findByUsername({
           username: searchInputText,
           context: this,
@@ -384,7 +371,17 @@
 
                 utils.getPhotostreamData({
                   userId: data.user.id,
-                  callback: getPhotostreamDataCallback
+                  context: this,
+                  callback: function(res) {
+                    try {
+                      var newPhotos = res.data.photos.photo;
+                      utils.clearChildrenElements(this.container);
+                      this.photos = newPhotos;
+                      this.generateThumbnailGallery(newPhotos);
+                    } catch (e) {
+                      throw e;
+                    }
+                  }
                 });
               }
             } catch (e) {

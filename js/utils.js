@@ -143,6 +143,7 @@
     var options = extend({
       userId: userId,
       page: 1,
+      context: window,
       callback: noop,
       refreshData: false
     }, opts);
@@ -164,7 +165,7 @@
           getFreshPhotostreamData(true, options);
         } else {
           if (options.callback && typeof options.callback === "function") {
-            options.callback.call(window, lsData);
+            options.callback.call(options.context, lsData);
           }
         }
       } else {
@@ -183,7 +184,7 @@
         // photoset_id: options.photosetId,
         user_id: options.userId,
         page: options.page,
-        per_page: 25,
+        per_page: 10,
         format: 'json',
         nojsoncallback: 1
       },
@@ -199,7 +200,7 @@
           localStorage.setItem(key, JSON.stringify(lsData));
         }
         if (options.callback && typeof options.callback === "function") {
-          options.callback.call(window, lsData);
+          options.callback.call(options.context, lsData);
         }
       }
     });
