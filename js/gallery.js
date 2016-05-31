@@ -21,6 +21,7 @@
     this.initElements();
     this.rebindHandlers();
     this.initUsernameSearch();
+    this.initThumbnailGalleryClickHandler();
   }
 
   Gallery.prototype.initElements = function() {
@@ -48,6 +49,19 @@
     }, 300);
     scrollHandler = scrollHandler.bind(this);
     window.addEventListener('scroll', scrollHandler, false);
+  };
+
+  Gallery.prototype.initThumbnailGalleryClickHandler = function() {
+    var self = this;
+    this.container.addEventListener('click', function(event) {
+      var listItem = event.target,
+      index = parseInt(listItem.dataset.index);
+
+      if (index !== index) {
+        return; // index is NaN
+      }
+      self.showLightbox(index);
+    }, false);
   };
 
   Gallery.prototype.showLightbox = function(index) {
@@ -193,6 +207,7 @@
     this.setTitle(this.currentImage.dataset.title);
     this.imageGallery.style.transform = 'translate3d(' + this.currentIndex * -this.imageWidth + 'px, 0, 0)';
     this.imageGallery.style.transition = 'all .4s ease';
+    this.showExif();
   };
 
   Gallery.prototype.setTitle = function(text) {
@@ -276,19 +291,11 @@
   };
 
   Gallery.prototype.generateThumbnailGallery = function() {
-    function eventHandler(index, gallery) {
-      return function(event) {
-        event.preventDefault();
-        gallery.showLightbox(index);
-      };
-    }
-
     var lastImageOnloadHandler = function() {
       if (utils.isScrolledToBottom()) {
         this.getNextPage();
       }
     };
-
     lastImageOnloadHandler = lastImageOnloadHandler.bind(this);
 
     var data,
@@ -306,14 +313,10 @@
       img.classList.add('thumbnail', 'loading');
       img.title = this.photos[i].title;
       img.alt = this.photos[i].title;
-
-      link = document.createElement('a');
-      link.href = img.src;
-      link.addEventListener('click', eventHandler(i, this));
-      link.appendChild(img);
+      img.dataset.index = i;
 
       listItem = document.createElement('li');
-      listItem.appendChild(link);
+      listItem.appendChild(img);
 
       this.container.appendChild(listItem);
 
@@ -442,14 +445,21 @@
               exifHash[exif[i].tag] = exif[i].raw._content;
             }
 
-            var cameraInfo = document.createElement('ul');
-            cameraInfo.id = 'exif--camera-info';
+
+            var cameraInfo = document.getElementById('exif--camera-info');
+            if (!cameraInfo) {
+              cameraInfo = document.createElement('ul');
+              cameraInfo.id = 'exif--camera-info';
+            }
             cameraInfo.innerHTML = '<li><strong>Camera</strong><span>' + camera + '</span></li>' +
               '<li><strong>Lens</strong><span>' + exifHash.LensModel + '</span></li>';
             imageMask.appendChild(cameraInfo);
 
-            var shootingInfo = document.createElement('ul');
-            shootingInfo.id = 'exif--shooting-info';
+            var shootingInfo = document.getElementById('exif--shooting-info');
+            if (!shootingInfo) {
+              shootingInfo = document.createElement('ul');
+              shootingInfo.id = 'exif--shooting-info';
+            }
             shootingInfo.innerHTML = '<li><strong>Apeture</strong><span><em>f</em>/' + exifHash.FNumber + '</span></li>' +
               '<li><strong>Exposure Time</strong><span>' + exifHash.ExposureTime + '</span></li>' +
               '<li><strong>Focal Length</strong><span>' + exifHash.FocalLength + '</span></li>' +

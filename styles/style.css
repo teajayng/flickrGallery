@@ -195,6 +195,8 @@ body {
     outline: 0;
     border: 1px solid #aaaaaa;
     background-color: transparent;
+    width: 92px;
+    text-align: center;
     -webkit-appearance: none; }
     #lightbox--image-title button:hover {
       background-color: white; }
@@ -323,6 +325,7 @@ nav {
     border: none;
     background-color: transparent;
     width: 78%;
+    font-weight: 300;
     -webkit-appearance: none; }
   #search button {
     opacity: .7;
@@ -416,6 +419,7 @@ nav {
   opacity: .8;
   outline: 0;
   border: none;
+  cursor: pointer;
   width: 150px;
   height: 150px;
   -webkit-appearance: none; }
