@@ -224,6 +224,7 @@
   function findByUsername(opts) {
     var options = extend({
       username: 'teajayng',
+      context: window,
       callback: noop
     }, opts);
 
@@ -238,7 +239,7 @@
       },
       callback: function(res) {
         if (options.callback && typeof options.callback === "function") {
-          options.callback.call(window, res);
+          options.callback.call(options.context, res);
         }
       }
     });
@@ -632,31 +633,28 @@
 
         getPhotostreamDataCallback = getPhotostreamDataCallback.bind(this);
 
-        var findByUsernameCallback = function(res) {
-          try {
-            var data = JSON.parse(res);
-            if (data.stat !== 'ok') {
-              throw data;
-            } else {
-              this.userId = data.user.id;
-              var h1 = document.querySelector('header h1');
-              h1.innerHTML = data.user.username._content + '&rsquo;s photostream';
-
-              utils.getPhotostreamData({
-                userId: data.user.id,
-                callback: getPhotostreamDataCallback
-              });
-            }
-          } catch (e) {
-            console.log(e);
-          }
-        };
-
-        findByUsernameCallback = findByUsernameCallback.bind(this);
-
         utils.findByUsername({
           username: searchInputText,
-          callback: findByUsernameCallback
+          context: this,
+          callback: function(res) {
+            try {
+              var data = JSON.parse(res);
+              if (data.stat !== 'ok') {
+                throw data;
+              } else {
+                this.userId = data.user.id;
+                var h1 = document.querySelector('header h1');
+                h1.innerHTML = data.user.username._content + '&rsquo;s photostream';
+
+                utils.getPhotostreamData({
+                  userId: data.user.id,
+                  callback: getPhotostreamDataCallback
+                });
+              }
+            } catch (e) {
+              console.log(e);
+            }
+          }
         });
       } catch (e) {
         console.log(e);

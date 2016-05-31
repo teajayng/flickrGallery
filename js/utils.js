@@ -224,6 +224,7 @@
   function findByUsername(opts) {
     var options = extend({
       username: 'teajayng',
+      context: window,
       callback: noop
     }, opts);
 
@@ -238,7 +239,7 @@
       },
       callback: function(res) {
         if (options.callback && typeof options.callback === "function") {
-          options.callback.call(window, res);
+          options.callback.call(options.context, res);
         }
       }
     });
