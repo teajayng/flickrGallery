@@ -184,7 +184,7 @@
         // photoset_id: options.photosetId,
         user_id: options.userId,
         page: options.page,
-        per_page: 10,
+        per_page: 25,
         format: 'json',
         nojsoncallback: 1
       },
