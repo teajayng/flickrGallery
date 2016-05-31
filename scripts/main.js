@@ -344,10 +344,13 @@
   };
 
   Gallery.prototype.recalculateLightbox = function(index) {
-    if (utils.calculateViewportWidth() <= 736) {
+    var viewportWidth = utils.calculateViewportWidth();
+    if (viewportWidth <= 736) {
       this.imageWidth = 320;
-    } else {
+    } else if (viewportWidth <= 1024) {
       this.imageWidth = 650;
+    } else {
+      this.imageWidth = 1024;
     }
 
     this.imageGallery.style.width = (this.photos.length * this.imageWidth).toString() + 'px';
@@ -391,7 +394,13 @@
     img = document.createElement('img');
 
     li.dataset.index = index;
-    img.src = utils.generateEmbiggenedPhotoUrl(this.photos[index]);
+
+    if (screen.width < 414) {
+      img.src = utils.generatePhotoUrl(this.photos[index]);
+    } else {
+      img.src = utils.generateEmbiggenedPhotoUrl(this.photos[index]);
+    }
+
     img.alt = this.photos[index].title;
     img.title = this.photos[index].title;
     li.style.position = 'absolute';
@@ -504,10 +513,13 @@
   };
 
   Gallery.prototype.setImageWidth = function() {
-    if (utils.calculateViewportWidth() <= 736) {
+    var viewportWidth = utils.calculateViewportWidth();
+    if (viewportWidth <= 736) {
       this.imageWidth = 320;
-    } else {
+    } else if (viewportWidth <= 1024) {
       this.imageWidth = 650;
+    } else {
+      this.imageWidth = 1024;
     }
   };
 
@@ -519,19 +531,32 @@
       };
     }
 
+    var lastImageOnloadHandler = function() {
+      if (utils.isScrolledToBottom()) {
+        this.getNextPage();
+      }
+    };
+
+    lastImageOnloadHandler = lastImageOnloadHandler.bind(this);
+
     var data,
     img,
     link,
     listItem;
 
     utils.clearChildrenElements(this.container);
+    var div = document.createElement('div');
+    var span = document.createElement('span');
+    div.id = 'loader-icon';
+    div.appendChild(span);
+    this.container.appendChild(div);
 
     for (var i = 0; i < this.photos.length; i++) {
       data = this.photos[i];
       img = document.createElement('img');
 
       img.src = utils.generateThumbnailUrl(this.photos[i]);
-      img.classList.add('thumbnail');
+      img.classList.add('thumbnail', 'loading');
       img.title = this.photos[i].title;
       img.alt = this.photos[i].title;
 
@@ -544,10 +569,12 @@
       listItem.appendChild(link);
 
       this.container.appendChild(listItem);
-    }
+      this.container.removeChild(div);
+      this.container.appendChild(div);
 
-    if (utils.isScrolledToBottom()) {
-      this.getNextPage();
+      if (i === this.photos.length - 1) {
+        img.onload = lastImageOnloadHandler;
+      }
     }
   };
 

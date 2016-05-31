@@ -21,7 +21,7 @@
     padding: 30px 30px 60px;
 
     width: 100%;
-    max-width: 850px;
+    max-width: 1125px;
     height: auto;
 
     overflow: hidden;
@@ -32,8 +32,8 @@
   }
 
   img {
-    max-width: 650px;
-    max-height: 433px;
+    max-width: 1024px;
+    max-height: 683px;
   }
 
   &.active {
@@ -67,8 +67,8 @@
 
     float: left;
 
-    width: 650px;
-    height: 433px;
+    width: 1024px;
+    height: 683px;
 
     justify-content: center;
     align-items: center;
@@ -78,8 +78,8 @@
 .lightbox--image-mask {
   position: relative;
 
-  width: 650px;
-  height: 433px;
+  width: 1024px;
+  height: 683px;
 
   overflow: hidden;
 }
@@ -207,12 +207,38 @@
   text-align: center;
 }
 
+@media screen and (max-width: 1024px) {
+
+  #lightbox {
+
+    img {
+      max-width: 650px;
+      max-height: 433px;
+    }
+  }
+
+  #lightbox--image-gallery {
+
+    li {
+      width: 650px;
+      height: 433px;
+    }
+  }
+
+  .lightbox--image-mask {
+    width: 650px;
+    height: 433px;
+  }
+}
+
 @media screen and (max-width: 736px) {
 
   #lightbox {
 
     .lightbox--wrapper {
       padding: 60px 0;
+
+      max-width: 850px;
     }
 
     img {

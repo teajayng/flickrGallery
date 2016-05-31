@@ -31,15 +31,15 @@ body {
     background-color: rgba(255, 255, 255, 0.9);
     padding: 30px 30px 60px;
     width: 100%;
-    max-width: 850px;
+    max-width: 1125px;
     height: auto;
     overflow: hidden;
     justify-content: center;
     align-items: center;
     flex-direction: column; }
   #lightbox img {
-    max-width: 650px;
-    max-height: 433px; }
+    max-width: 1024px;
+    max-height: 683px; }
   #lightbox.active {
     display: flex;
     visibility: visible; }
@@ -59,15 +59,15 @@ body {
   #lightbox--image-gallery li {
     display: flex;
     float: left;
-    width: 650px;
-    height: 433px;
+    width: 1024px;
+    height: 683px;
     justify-content: center;
     align-items: center; }
 
 .lightbox--image-mask {
   position: relative;
-  width: 650px;
-  height: 433px;
+  width: 1024px;
+  height: 683px;
   overflow: hidden; }
 
 #lightbox--close {
@@ -150,9 +150,22 @@ body {
   left: 0;
   text-align: center; }
 
+@media screen and (max-width: 1024px) {
+  #lightbox img {
+    max-width: 650px;
+    max-height: 433px; }
+
+  #lightbox--image-gallery li {
+    width: 650px;
+    height: 433px; }
+
+  .lightbox--image-mask {
+    width: 650px;
+    height: 433px; } }
 @media screen and (max-width: 736px) {
   #lightbox .lightbox--wrapper {
-    padding: 60px 0; }
+    padding: 60px 0;
+    max-width: 850px; }
   #lightbox img {
     max-width: 320px;
     max-height: 213px; }
@@ -321,33 +334,6 @@ nav {
   #refresh-data.refreshing:hover {
     color: #3cc85a; }
 
-.loader-icon {
-  display: inline-block;
-  position: relative;
-  top: 0;
-  left: 0;
-  margin-right: 7px;
-  border: 0.2em solid #474747;
-  border-top: .2em solid transparent;
-  border-right: 0.2em solid #474747;
-  border-bottom: 0.2em solid #474747;
-  border-radius: 50%;
-  width: 1em;
-  height: 1em;
-  vertical-align: middle; }
-  .loader-icon:after {
-    display: block;
-    position: absolute;
-    top: -.3em;
-    left: .75em;
-    transform: translate(-15px, 0) rotate(45deg);
-    border-width: 0 .4em .4em;
-    border-style: solid;
-    border-color: transparent transparent #474747;
-    width: 0;
-    height: 0;
-    content: ' '; }
-
 .page-wrapper {
   margin: 0 auto -64px;
   min-height: 100%; }
@@ -381,7 +367,12 @@ nav {
   opacity: .8;
   outline: 0;
   border: none;
+  width: 150px;
+  height: 150px;
   -webkit-appearance: none; }
+  .thumbnail img {
+    width: 150px;
+    height: 150px; }
   .thumbnail:hover {
     opacity: 1; }
 
