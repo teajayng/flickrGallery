@@ -16,9 +16,9 @@
     display: flex;
     position: relative;
 
-    background-color: $white-with-alpha;
+    background-color: white-alpha(.9);
 
-    padding: 30px 30px 60px;
+    padding: 30px 30px 90px;
 
     width: 100%;
     max-width: 1125px;
@@ -75,13 +75,75 @@
   }
 }
 
-.lightbox--image-mask {
+#lightbox--image-mask {
   position: relative;
 
   width: 1024px;
   height: 683px;
 
   overflow: hidden;
+
+  #exif--camera-info,
+  #exif--shooting-info {
+    position: absolute;
+    top: 1em;
+
+    opacity: 0;
+
+    margin: 0;
+
+    background-color: white-alpha(.5);
+
+    padding: .75em;
+
+    list-style: none;
+
+    li {
+      margin-bottom: 1em;
+
+      &:last-of-type {
+        margin-bottom: 0;
+      }
+    }
+
+    strong {
+      display: block;
+
+      text-transform: uppercase;
+
+      line-height: .9em;
+      color: $gray-text;
+
+      font-size: .75em;
+      font-weight: 400;
+    }
+
+    span {
+      display: inline-block;
+
+      line-height: .8em;
+
+      em {
+        font-style: italic;
+      }
+    }
+  }
+
+  #exif--camera-info {
+    left: 1em;
+  }
+
+  #exif--shooting-info {
+    right: 1em;
+  }
+
+  &.exif--show {
+
+    #exif--camera-info,
+    #exif--shooting-info {
+      opacity: .8;
+    }
+  }
 }
 
 #lightbox--close {
@@ -144,7 +206,6 @@
   text-indent: -9999px;
 
   whtite-space: nowrap;
-
   justify-content: center;
   align-items: center;
   -webkit-tap-highlight-color: transparent;
@@ -200,11 +261,31 @@
 }
 
 #lightbox--image-title {
+  display: flex;
   position: absolute;
   right: 0;
   left: 0;
 
   text-align: center;
+
+  align-items: center;
+  justify-content: center;
+  flex-flow: column wrap;
+  align-content: center;
+
+  button {
+    outline: 0;
+
+    border: 1px solid $gray-text;
+
+    background-color: transparent;
+
+    -webkit-appearance: none;
+
+    &:hover {
+      background-color: $white;
+    }
+  }
 }
 
 @media screen and (max-width: 1024px) {
@@ -225,7 +306,7 @@
     }
   }
 
-  .lightbox--image-mask {
+  #lightbox--image-mask {
     width: 650px;
     height: 433px;
   }
@@ -236,7 +317,7 @@
   #lightbox {
 
     .lightbox--wrapper {
-      padding: 60px 0;
+      padding: 60px 0 90px;
 
       max-width: 850px;
     }
@@ -247,7 +328,7 @@
     }
   }
 
-  .lightbox--image-mask {
+  #lightbox--image-mask {
     width: 320px;
     height: 213px;
   }

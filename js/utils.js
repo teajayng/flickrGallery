@@ -182,7 +182,6 @@
       data: {
         method: 'flickr.people.getPublicPhotos',
         api_key: apiKey,
-        // photoset_id: options.photosetId,
         user_id: options.userId,
         page: options.page,
         per_page: 25,
@@ -247,6 +246,31 @@
     });
   }
 
+  function getExif(opts) {
+    var options = extend({
+      photo_id: '0',
+      context: window,
+      callback: noop
+    }, opts);
+
+    utils.get({
+      url: 'https://api.flickr.com/services/rest/',
+      data: {
+        method: 'flickr.photos.getExif',
+        api_key: apiKey,
+        photo_id: options.photo_id,
+        format: 'json',
+        nojsoncallback: 1
+      },
+      callback: function(res) {
+        if (options.callback && typeof options.callback === "function") {
+          options.callback.call(options.context, res);
+        }
+      }
+    });
+  }
+
+
   window.utils = extend(window.utils || {}, {
     extend: extend,
     getQueryParam: getQueryParam,
@@ -261,6 +285,7 @@
     generatePhotoUrl: generatePhotoUrl,
     generateEmbiggenedPhotoUrl: generateEmbiggenedPhotoUrl,
 
-    findByUsername: findByUsername
+    findByUsername: findByUsername,
+    getExif: getExif
   });
 })(window);

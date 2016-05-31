@@ -29,7 +29,7 @@ body {
     display: flex;
     position: relative;
     background-color: rgba(255, 255, 255, 0.9);
-    padding: 30px 30px 60px;
+    padding: 30px 30px 90px;
     width: 100%;
     max-width: 1125px;
     height: auto;
@@ -64,11 +64,48 @@ body {
     justify-content: center;
     align-items: center; }
 
-.lightbox--image-mask {
+#lightbox--image-mask {
   position: relative;
   width: 1024px;
   height: 683px;
   overflow: hidden; }
+  #lightbox--image-mask #exif--camera-info,
+  #lightbox--image-mask #exif--shooting-info {
+    position: absolute;
+    top: 1em;
+    opacity: 0;
+    margin: 0;
+    background-color: rgba(255, 255, 255, 0.5);
+    padding: .75em;
+    list-style: none; }
+    #lightbox--image-mask #exif--camera-info li,
+    #lightbox--image-mask #exif--shooting-info li {
+      margin-bottom: 1em; }
+      #lightbox--image-mask #exif--camera-info li:last-of-type,
+      #lightbox--image-mask #exif--shooting-info li:last-of-type {
+        margin-bottom: 0; }
+    #lightbox--image-mask #exif--camera-info strong,
+    #lightbox--image-mask #exif--shooting-info strong {
+      display: block;
+      text-transform: uppercase;
+      line-height: .9em;
+      color: #aaaaaa;
+      font-size: .75em;
+      font-weight: 400; }
+    #lightbox--image-mask #exif--camera-info span,
+    #lightbox--image-mask #exif--shooting-info span {
+      display: inline-block;
+      line-height: .8em; }
+      #lightbox--image-mask #exif--camera-info span em,
+      #lightbox--image-mask #exif--shooting-info span em {
+        font-style: italic; }
+  #lightbox--image-mask #exif--camera-info {
+    left: 1em; }
+  #lightbox--image-mask #exif--shooting-info {
+    right: 1em; }
+  #lightbox--image-mask.exif--show #exif--camera-info,
+  #lightbox--image-mask.exif--show #exif--shooting-info {
+    opacity: .8; }
 
 #lightbox--close {
   position: absolute;
@@ -145,10 +182,22 @@ body {
     background-repeat: no-repeat; }
 
 #lightbox--image-title {
+  display: flex;
   position: absolute;
   right: 0;
   left: 0;
-  text-align: center; }
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  flex-flow: column wrap;
+  align-content: center; }
+  #lightbox--image-title button {
+    outline: 0;
+    border: 1px solid #aaaaaa;
+    background-color: transparent;
+    -webkit-appearance: none; }
+    #lightbox--image-title button:hover {
+      background-color: white; }
 
 @media screen and (max-width: 1024px) {
   #lightbox img {
@@ -159,18 +208,18 @@ body {
     width: 650px;
     height: 433px; }
 
-  .lightbox--image-mask {
+  #lightbox--image-mask {
     width: 650px;
     height: 433px; } }
 @media screen and (max-width: 736px) {
   #lightbox .lightbox--wrapper {
-    padding: 60px 0;
+    padding: 60px 0 90px;
     max-width: 850px; }
   #lightbox img {
     max-width: 320px;
     max-height: 213px; }
 
-  .lightbox--image-mask {
+  #lightbox--image-mask {
     width: 320px;
     height: 213px; }
 

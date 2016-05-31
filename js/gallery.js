@@ -104,6 +104,7 @@
 
   Gallery.prototype.addCurrentImage = function() {
     this.currentImage = this.addImage(this.currentIndex);
+    this.showExif();
   };
 
   Gallery.prototype.addPrevImage = function() {
@@ -197,6 +198,20 @@
   Gallery.prototype.setTitle = function(text) {
     var p = document.getElementById('lightbox--image-title');
     p.textContent = text;
+
+    var exifButton = document.createElement('button');
+    exifButton.textContent = "Show EXIF";
+    exifButton.onclick = function() {
+      var imageMask = document.getElementById('lightbox--image-mask');
+      if (this.textContent === "Show EXIF") {
+        imageMask.classList.add('exif--show');
+        this.textContent = "Hide EXIF";
+      } else {
+        imageMask.classList.remove('exif--show');
+        this.textContent = "Show EXIF";
+      }
+    };
+    p.appendChild(exifButton);
   };
 
   Gallery.prototype.keyupHandler = function() {
@@ -406,6 +421,46 @@
         menuCheckbox.checked = false;
       }
     }, false);
+  };
+
+  Gallery.prototype.showExif = function() {
+    var currentImageData = this.photos[this.currentIndex];
+    utils.getExif({
+      photo_id: currentImageData.id,
+      context: this,
+      callback: function(res) {
+        try {
+          var data = JSON.parse(res),
+          imageMask = document.getElementById('lightbox--image-mask');
+
+          if (data.stat === "ok") {
+            var camera = data.photo.camera ? data.photo.camera : '',
+            exif = data.photo.exif ? data.photo.exif : [],
+            exifHash = {};
+
+            for (var i = 0; i < exif.length; i++) {
+              exifHash[exif[i].tag] = exif[i].raw._content;
+            }
+
+            var cameraInfo = document.createElement('ul');
+            cameraInfo.id = 'exif--camera-info';
+            cameraInfo.innerHTML = '<li><strong>Camera</strong><span>' + camera + '</span></li>' +
+              '<li><strong>Lens</strong><span>' + exifHash.LensModel + '</span></li>';
+            imageMask.appendChild(cameraInfo);
+
+            var shootingInfo = document.createElement('ul');
+            shootingInfo.id = 'exif--shooting-info';
+            shootingInfo.innerHTML = '<li><strong>Apeture</strong><span><em>f</em>/' + exifHash.FNumber + '</span></li>' +
+              '<li><strong>Exposure Time</strong><span>' + exifHash.ExposureTime + '</span></li>' +
+              '<li><strong>Focal Length</strong><span>' + exifHash.FocalLength + '</span></li>' +
+              '<li><strong>ISO</strong><span>' + exifHash.ISO + '</span></li>';
+            imageMask.appendChild(shootingInfo);
+          }
+        } catch (e) {
+          // console.log(e);
+        }
+      }
+    });
   };
 
   window.Gallery = Gallery;

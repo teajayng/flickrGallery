@@ -182,7 +182,6 @@
       data: {
         method: 'flickr.people.getPublicPhotos',
         api_key: apiKey,
-        // photoset_id: options.photosetId,
         user_id: options.userId,
         page: options.page,
         per_page: 25,
@@ -247,6 +246,31 @@
     });
   }
 
+  function getExif(opts) {
+    var options = extend({
+      photo_id: '0',
+      context: window,
+      callback: noop
+    }, opts);
+
+    utils.get({
+      url: 'https://api.flickr.com/services/rest/',
+      data: {
+        method: 'flickr.photos.getExif',
+        api_key: apiKey,
+        photo_id: options.photo_id,
+        format: 'json',
+        nojsoncallback: 1
+      },
+      callback: function(res) {
+        if (options.callback && typeof options.callback === "function") {
+          options.callback.call(options.context, res);
+        }
+      }
+    });
+  }
+
+
   window.utils = extend(window.utils || {}, {
     extend: extend,
     getQueryParam: getQueryParam,
@@ -261,7 +285,8 @@
     generatePhotoUrl: generatePhotoUrl,
     generateEmbiggenedPhotoUrl: generateEmbiggenedPhotoUrl,
 
-    findByUsername: findByUsername
+    findByUsername: findByUsername,
+    getExif: getExif
   });
 })(window);
 ;(function(window) {
@@ -370,6 +395,7 @@
 
   Gallery.prototype.addCurrentImage = function() {
     this.currentImage = this.addImage(this.currentIndex);
+    this.showExif();
   };
 
   Gallery.prototype.addPrevImage = function() {
@@ -463,6 +489,20 @@
   Gallery.prototype.setTitle = function(text) {
     var p = document.getElementById('lightbox--image-title');
     p.textContent = text;
+
+    var exifButton = document.createElement('button');
+    exifButton.textContent = "Show EXIF";
+    exifButton.onclick = function() {
+      var imageMask = document.getElementById('lightbox--image-mask');
+      if (this.textContent === "Show EXIF") {
+        imageMask.classList.add('exif--show');
+        this.textContent = "Hide EXIF";
+      } else {
+        imageMask.classList.remove('exif--show');
+        this.textContent = "Show EXIF";
+      }
+    };
+    p.appendChild(exifButton);
   };
 
   Gallery.prototype.keyupHandler = function() {
@@ -672,6 +712,46 @@
         menuCheckbox.checked = false;
       }
     }, false);
+  };
+
+  Gallery.prototype.showExif = function() {
+    var currentImageData = this.photos[this.currentIndex];
+    utils.getExif({
+      photo_id: currentImageData.id,
+      context: this,
+      callback: function(res) {
+        try {
+          var data = JSON.parse(res),
+          imageMask = document.getElementById('lightbox--image-mask');
+
+          if (data.stat === "ok") {
+            var camera = data.photo.camera ? data.photo.camera : '',
+            exif = data.photo.exif ? data.photo.exif : [],
+            exifHash = {};
+
+            for (var i = 0; i < exif.length; i++) {
+              exifHash[exif[i].tag] = exif[i].raw._content;
+            }
+
+            var cameraInfo = document.createElement('ul');
+            cameraInfo.id = 'exif--camera-info';
+            cameraInfo.innerHTML = '<li><strong>Camera</strong><span>' + camera + '</span></li>' +
+              '<li><strong>Lens</strong><span>' + exifHash.LensModel + '</span></li>';
+            imageMask.appendChild(cameraInfo);
+
+            var shootingInfo = document.createElement('ul');
+            shootingInfo.id = 'exif--shooting-info';
+            shootingInfo.innerHTML = '<li><strong>Apeture</strong><span><em>f</em>/' + exifHash.FNumber + '</span></li>' +
+              '<li><strong>Exposure Time</strong><span>' + exifHash.ExposureTime + '</span></li>' +
+              '<li><strong>Focal Length</strong><span>' + exifHash.FocalLength + '</span></li>' +
+              '<li><strong>ISO</strong><span>' + exifHash.ISO + '</span></li>';
+            imageMask.appendChild(shootingInfo);
+          }
+        } catch (e) {
+          // console.log(e);
+        }
+      }
+    });
   };
 
   window.Gallery = Gallery;
