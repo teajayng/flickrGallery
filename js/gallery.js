@@ -1,16 +1,15 @@
 (function(window) {
   'use strict';
 
-  var userId = '44738776@N00';
-
   function Gallery(photos, container) {
     this.photos = photos;
     this.container = container;
 
-    this.userId = null;
+    this.userId = '91612334@N05'; // default to mistahchen10 for init
 
     this.currentIndex = 0;
     this.currentImage = null;
+    this.lightboxVisible = false;
     this.loadedImages = {};
 
     this.page = 1;
@@ -21,6 +20,7 @@
 
     this.initElements();
     this.rebindHandlers();
+    this.initUsernameSearch();
   }
 
   Gallery.prototype.initElements = function() {
@@ -30,6 +30,8 @@
     this.overlay = document.getElementById('lightbox--overlay');
     this.lightbox = document.getElementById('lightbox');
     this.imageGallery = document.getElementById('lightbox--image-gallery');
+    this.searchInput = document.getElementById('username-search');
+    this.searchSubmit = document.getElementById('username-search--submit');
   };
 
   Gallery.prototype.rebindHandlers = function() {
@@ -49,9 +51,8 @@
   };
 
   Gallery.prototype.showLightbox = function(index) {
-    var self = this;
-
     this.currentIndex = index;
+    this.lightboxVisible = true;
 
     this.addCurrentImage();
     this.addPrevImage();
@@ -235,6 +236,7 @@
     this.imageGallery.innerHTML = '';
     this.currentIndex = 0;
     this.currentImage = null;
+    this.lightboxVisible = false;
     this.loadedImages = {};
   };
 
@@ -246,9 +248,7 @@
     }
   };
 
-  Gallery.prototype.generateThumbnailGallery = function(photos) {
-    photos = typeof photos !== 'undefined' ? photos : this.photos;
-
+  Gallery.prototype.generateThumbnailGallery = function() {
     function eventHandler(index, gallery) {
       return function(event) {
         event.preventDefault();
@@ -261,14 +261,16 @@
     link,
     listItem;
 
-    for (var i = 0; i < photos.length; i++) {
-      data = photos[i];
+    utils.clearChildrenElements(this.container);
+
+    for (var i = 0; i < this.photos.length; i++) {
+      data = this.photos[i];
       img = document.createElement('img');
 
-      img.src = utils.generateThumbnailUrl(photos[i]);
+      img.src = utils.generateThumbnailUrl(this.photos[i]);
       img.classList.add('thumbnail');
-      img.title = photos[i].title;
-      img.alt = photos[i].title;
+      img.title = this.photos[i].title;
+      img.alt = this.photos[i].title;
 
       link = document.createElement('a');
       link.href = img.src;
@@ -283,36 +285,30 @@
   };
 
   Gallery.prototype.getNextPage = function(page) {
-    var afterGettingNextPage = this.afterGettingNextPage.bind(this),
-    options = {
-      page: this.page,
-      callback: afterGettingNextPage
-    };
+    var afterGettingNextPage = this.afterGettingNextPage.bind(this);
+    this.page++;
+    page = typeof page !== 'undefined' ? page : this.page;
 
-    if (typeof page === 'undefined') {
-      if (this.page < this.pages) {
-        page = this.page++;
-      }
+    if (page < this.pages) {
+      var options = {
+        userId: this.userId,
+        page: page,
+        callback: afterGettingNextPage
+      };
+
+      utils.getPhotostreamData(options);
     }
-
-    if (this.userId) {
-      options.userId = this.userId;
-    }
-
-    utils.getPhotostreamData(options);
   };
 
   Gallery.prototype.getNextPageAndAddImage = function() {
     this.page++;
+
     var afterGettingNextPage = this.afterGettingNextPage.bind(this),
     options = {
+      userId: this.userId,
       page: this.page,
       callback: afterGettingNextPage
     };
-
-    if (this.userId) {
-      options.userId = this.userId;
-    }
 
     utils.getPhotostreamData(options);
   };
@@ -320,14 +316,78 @@
   Gallery.prototype.afterGettingNextPage = function(res) {
     try {
       var photos = res.data.photos.photo;
-      this.generateThumbnailGallery(photos);
-
-      // update stored image data
       this.photos = this.photos.concat(photos);
-      this.addNextImage();
+      this.generateThumbnailGallery();
+
+      if (this.lightboxVisible) {
+        this.addNextImage();
+      }
     } catch (e) {
       // handle errors
     }
+  };
+
+  Gallery.prototype.initUsernameSearch = function() {
+    var searchHandler = function() {
+      try {
+        var searchInputText = this.searchInput.value;
+
+        var getPhotostreamDataCallback = function(res) {
+          try {
+            var newPhotos = res.data.photos.photo;
+            utils.clearChildrenElements(this.container);
+            this.photos = newPhotos;
+            this.generateThumbnailGallery(newPhotos);
+          } catch (e) {
+            throw e;
+          }
+        };
+
+        getPhotostreamDataCallback = getPhotostreamDataCallback.bind(this);
+
+        var findByUsernameCallback = function(res) {
+          try {
+            var data = JSON.parse(res);
+            if (data.stat !== 'ok') {
+              throw data;
+            } else {
+              this.userId = data.user.id;
+              var h1 = document.querySelector('header h1');
+              h1.innerHTML = data.user.username._content + '&rsquo;s photostream';
+
+              utils.getPhotostreamData({
+                userId: data.user.id,
+                callback: getPhotostreamDataCallback
+              });
+            }
+          } catch (e) {
+            console.log(e);
+          }
+        };
+
+        findByUsernameCallback = findByUsernameCallback.bind(this);
+
+        utils.findByUsername({
+          username: searchInputText,
+          callback: findByUsernameCallback
+        });
+      } catch (e) {
+        console.log(e);
+        this.container.classList.add('error');
+        this.container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the username data.</p>';
+      }
+    };
+
+    searchHandler = searchHandler.bind(this);
+    this.searchSubmit.addEventListener('click', searchHandler, false);
+    this.searchInput.addEventListener('keyup', function() {
+      var keyCode = event.which || event.keyCode || 0;
+      if (keyCode === 13) {
+        searchHandler();
+        var menuCheckbox = document.getElementById('menu-icon--checkbox');
+        menuCheckbox.checked = false;
+      }
+    }, false);
   };
 
   window.Gallery = Gallery;

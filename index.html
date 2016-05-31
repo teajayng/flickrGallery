@@ -14,17 +14,17 @@
     <header>
       <h1>flickr gallery</h1>
       <nav>
-        <label for="menu-icon--checkbox" id="menu-icon">
-          menu
-        </label>
         <input type="checkbox" id="menu-icon--checkbox">
+        <label for="menu-icon--checkbox" id="menu-icon" aria-label="menu" role="navigation"></label>
 
         <ul>
           <li id="search">
-            <input type="text" name="username" id="username-search" aria-label="Username search">
+            <input type="text" name="username" id="username-search" aria-label="Username search" placeholder="Search username">
             <button type="submit" id="username-search--submit">Submit</button>
           </li>
-          <li id="refresh-data"><span></span>clear cached data</li>
+          <li id="refresh-data">
+            <span class="loader-icon"></span>clear cached data
+          </li>
         </ul>
       </nav>
     </header>

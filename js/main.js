@@ -2,8 +2,15 @@
   'use strict';
 
   var flickrGallery;
+  var devMode = false;
 
   function init() {
+    devMode = !!utils.getQueryParam('dev');
+
+    if (devMode) {
+      document.getElementById('refresh-data').classList.add('dev-mode');
+    }
+
     utils.getPhotostreamData({
       callback: function(res) {
         var container = document.getElementById('thumbnail-gallery');
@@ -16,100 +23,59 @@
           flickrGallery.pages = res.data.photos.pages;
           flickrGallery.generateThumbnailGallery();
 
-          var refreshDataEl = document.getElementById('refresh-data'),
-          refreshDataElText = refreshDataEl.textContent,
-          refreshData = function() {
-            var afterRefresh = function(res) {
-              this.container.classList.remove('error');
-              refreshDataEl.classList.remove('refreshing');
-              refreshDataEl.innerHTML = '<span></span>' + refreshDataElText;
-
-              try {
-                this.photos = res.data.photos.photo;
-                while (this.container.hasChildNodes()) {
-                  this.container.removeChild(this.container.firstChild);
-                }
-                this.generateThumbnailGallery();
-
-                if (this.page > 1) {
-                  for (var i = 2; i <= this.page; i++) {
-                    this.getNextPage(i);
-                  }
-                }
-              } catch (e) {
-                this.container.classList.add('error');
-                this.container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the data.</p>';
-              }
-            };
-            afterRefresh = afterRefresh.bind(this);
-
-            refreshDataEl.classList.add('refreshing');
-            refreshDataEl.textContent = 'refreshing...';
-
-            utils.getPhotostreamData({
-              refreshData: true,
-              callback: afterRefresh
-            });
-          };
-          refreshData = refreshData.bind(flickrGallery);
-          refreshDataEl.addEventListener('click', refreshData, false);
-
-          try {
-            var searchInput = document.getElementById('username-search'),
-            searchSubmit = document.getElementById('username-search--submit'),
-            searchHandler = function() {
-              var searchInputText = searchInput.value;
-
-              utils.findByUsername({
-                username: searchInputText,
-                callback: function(res) {
-                  try {
-                    var data = JSON.parse(res);
-                    flickrGallery.userId = data.user.id;
-                    if (data.stat !== 'ok') {
-                      throw data;
-                    } else {
-                      utils.getPhotostreamData({
-                        userId: data.user.id,
-                        callback: function(res) {
-                          try {
-                            var newPhotos = res.data.photos.photo;
-                            while (flickrGallery.container.hasChildNodes()) {
-                              flickrGallery.container.removeChild(flickrGallery.container.firstChild);
-                            }
-                            flickrGallery.generateThumbnailGallery(newPhotos);
-                          } catch (e) {
-                            throw e;
-                          }
-                        }
-                      });
-                    }
-                  } catch (e) {
-                    console.log(e);
-                  }
-                }
-              });
-            };
-
-            searchSubmit.addEventListener('click', searchHandler, false);
-            searchInput.addEventListener('keyup', function() {
-              var keyCode = event.which || event.keyCode || 0;
-              if (keyCode === 13) {
-                searchHandler();
-                var menuCheckbox = document.getElementById('menu-icon--checkbox');
-                menuCheckbox.checked = false;
-              }
-            }, false);
-          } catch (e) {
-            container.classList.add('error');
-            container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the username data.</p>';
+          if (devMode) {
+            initializeDevMode(flickrGallery);
           }
         } catch (e) {
+          console.log(e);
           container.classList.add('error');
           container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the photostream data.</p>';
         }
       }
     });
+  }
+
+  // this adds a "refresh data" button to force fetch new photostream data
+  // photostream data is otherwise pulled from localstorage if it's there
+  //
+  // this button displays pretty terribly on mobile devices
+  function initializeDevMode(flickrGallery) {
+    var refreshDataEl = document.getElementById('refresh-data'),
+    refreshDataElText = refreshDataEl.textContent,
+    refreshData = function() {
+      var afterRefresh = function(res) {
+        this.container.classList.remove('error');
+        refreshDataEl.classList.remove('refreshing');
+        refreshDataEl.innerHTML = '<span></span>' + refreshDataElText;
+
+        try {
+          this.photos = res.data.photos.photo;
+          utils.clearChildrenElements(this.container);
+          this.generateThumbnailGallery();
+
+          if (this.page > 1) {
+            for (var i = 2; i <= this.page; i++) {
+              this.getNextPage(i);
+            }
+          }
+        } catch (e) {
+          this.container.classList.add('error');
+          this.container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the data.</p>';
+        }
+      };
+      afterRefresh = afterRefresh.bind(this);
+
+      refreshDataEl.classList.add('refreshing');
+      refreshDataEl.textContent = 'refreshing...';
+
+      utils.getPhotostreamData({
+        refreshData: true,
+        callback: afterRefresh
+      });
+    };
+
+    refreshData = refreshData.bind(flickrGallery);
+    refreshDataEl.addEventListener('click', refreshData, false);
   }
 
   window.FlickrGallery = utils.extend(window.FlickrGallery || {}, {

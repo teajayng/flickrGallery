@@ -2,7 +2,8 @@
   'use strict';
 
   var apiKey = '6569236893a124291e840668242de95b',
-  userId = '44738776@N00';
+  // userId = '44738776@N00'; // default value, username teajayng
+  userId = '91612334@N05'; // default value, username mistahchen10
 
   function extend(object) {
     for (var i = 1; i < arguments.length; i++) {
@@ -110,6 +111,14 @@
     scrollHeight = (document.documentElement && document.documentElement.scrollHeight) || document.body.scrollHeight;
 
     return (scrollTop + window.innerHeight) >= scrollHeight;
+  }
+
+  function clearChildrenElements(el) {
+    if (el) {
+      while (el.hasChildNodes()) {
+        el.removeChild(el.firstChild);
+      }
+    }
   }
 
   function testForLocalStorage() {
@@ -242,6 +251,7 @@
     debounce: debounce,
     calculateViewportWidth: calculateViewportWidth,
     isScrolledToBottom: isScrolledToBottom,
+    clearChildrenElements: clearChildrenElements,
 
     getPhotostreamData: getPhotostreamData,
     generateThumbnailUrl: generateThumbnailUrl,
