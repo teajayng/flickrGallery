@@ -27,7 +27,7 @@
             initializeDevMode(flickrGallery);
           }
         } catch (e) {
-          console.log(e);
+          // console.log(e);
           container.classList.add('error');
           container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the photostream data.</p>';
         }
@@ -65,6 +65,7 @@
               }
             }
           } catch (e) {
+            // console.log(e);
             this.container.classList.add('error');
             this.container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the data.</p>';
           }

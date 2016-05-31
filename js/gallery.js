@@ -327,7 +327,7 @@
   Gallery.prototype.getNextPageAndAddImage = function() {
     this.page++;
 
-    options = {
+    var options = {
       userId: this.userId,
       page: this.page,
       context: this,
@@ -347,7 +347,7 @@
         this.addNextImage();
       }
     } catch (e) {
-      // handle errors
+      // console.log(e);
     }
   };
 
@@ -385,12 +385,12 @@
                 });
               }
             } catch (e) {
-              console.log(e);
+              // console.log(e);
             }
           }
         });
       } catch (e) {
-        console.log(e);
+        // console.log(e);
         this.container.classList.add('error');
         this.container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the username data.</p>';
       }

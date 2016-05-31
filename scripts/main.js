@@ -131,6 +131,7 @@
       localStorage.removeItem('test');
       return true;
     } catch (e) {
+      // console.log(e);
       return false;
     }
   }
@@ -592,7 +593,7 @@
   Gallery.prototype.getNextPageAndAddImage = function() {
     this.page++;
 
-    options = {
+    var options = {
       userId: this.userId,
       page: this.page,
       context: this,
@@ -612,7 +613,7 @@
         this.addNextImage();
       }
     } catch (e) {
-      // handle errors
+      // console.log(e);
     }
   };
 
@@ -650,12 +651,12 @@
                 });
               }
             } catch (e) {
-              console.log(e);
+              // console.log(e);
             }
           }
         });
       } catch (e) {
-        console.log(e);
+        // console.log(e);
         this.container.classList.add('error');
         this.container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the username data.</p>';
       }
@@ -704,7 +705,7 @@
             initializeDevMode(flickrGallery);
           }
         } catch (e) {
-          console.log(e);
+          // console.log(e);
           container.classList.add('error');
           container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the photostream data.</p>';
         }
@@ -742,6 +743,7 @@
               }
             }
           } catch (e) {
+            // console.log(e);
             this.container.classList.add('error');
             this.container.innerHTML = '<h2>Sorry!</h2><p>There was an issue retrieving the data.</p>';
           }

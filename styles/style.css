@@ -109,7 +109,7 @@ body {
   width: 100px;
   height: auto;
   text-indent: -9999px;
-  white-space: nowrap;
+  whtite-space: nowrap;
   justify-content: center;
   align-items: center;
   -webkit-tap-highlight-color: transparent; }
