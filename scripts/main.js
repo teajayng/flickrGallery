@@ -545,11 +545,6 @@
     listItem;
 
     utils.clearChildrenElements(this.container);
-    var div = document.createElement('div');
-    var span = document.createElement('span');
-    div.id = 'loader-icon';
-    div.appendChild(span);
-    this.container.appendChild(div);
 
     for (var i = 0; i < this.photos.length; i++) {
       data = this.photos[i];
@@ -569,8 +564,6 @@
       listItem.appendChild(link);
 
       this.container.appendChild(listItem);
-      this.container.removeChild(div);
-      this.container.appendChild(div);
 
       if (i === this.photos.length - 1) {
         img.onload = lastImageOnloadHandler;
