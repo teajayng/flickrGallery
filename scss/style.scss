@@ -19,9 +19,13 @@ header {
   h1 {
     float: left;
 
+    text-rendering: optimizeLegibility;
+
     letter-spacing: 1px;
 
     font-weight: 300;
+
+    -webkit-font-smoothing: antialiased;
   }
 
   &:after {
@@ -120,8 +124,11 @@ nav {
 
     width: 78%;
 
+    text-rendering: optimizeLegibility;
+
     font-weight: 300;
 
+    -webkit-font-smoothing: antialiased;
     -webkit-appearance: none;
   }
 
@@ -305,7 +312,11 @@ footer {
 
   height: 64px;
 
+  text-rendering: optimizeSpeed;
+
   font-weight: 500;
+
+  -webkit-font-smoothing: antialiased;
 }
 
 p {
